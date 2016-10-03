@@ -1,4 +1,4 @@
-# Fresh8
+# Fresh8 JS Module
 [ ![Codeship Status for ConnectedVentures/fresh8-js-package](https://codeship.com/projects/855f03a0-6605-0134-5b68-3a48f3bc55ca/status?branch=master)](https://codeship.com/projects/175768)
 [![JavaScript Style Guide](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com/)
 
