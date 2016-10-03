@@ -1,0 +1,66 @@
+{
+  "name": "fresh8.js",
+  "version": "1.0.0",
+  "description": "Dynamically inject Fresh8 ads into your website or app.",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "karma start test/unit/karma.conf.js --single-run",
+    "build": "node ./build/build",
+    "dev": "node ./build/watch & karma start test/unit/karma.conf.js",
+    "cov": "open ./test/unit/coverage/lcov-report/index.html",
+    "prepublish": "npm run build"
+  },
+  "bugs": {
+    "url": "https://github.com/fresh8/js-module/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fresh8/js-module.git"
+  },
+  "keywords": [
+    "ads",
+    "fresh8",
+    "fresh8gaming"
+  ],
+  "author": "Fresh8",
+  "devDependencies": {
+    "babel-cli": "^6.11.4",
+    "babel-eslint": "^6.1.2",
+    "babel-loader": "^6.2.5",
+    "babel-plugin-transform-object-assign": "^6.8.0",
+    "babel-preset-es2015": "^6.9.0",
+    "babel-preset-stage-2": "^6.11.0",
+    "chai": "^3.5.0",
+    "eslint": "^3.2.0",
+    "eslint-config-standard": "^5.3.5",
+    "eslint-friendly-formatter": "^2.0.6",
+    "eslint-loader": "^1.5.0",
+    "eslint-plugin-promise": "^2.0.0",
+    "eslint-plugin-standard": "^2.0.0",
+    "function-bind": "^1.1.0",
+    "install": "^0.8.1",
+    "isparta": "^4.0.0",
+    "isparta-loader": "^2.0.0",
+    "karma": "^1.3.0",
+    "karma-coverage": "^1.1.1",
+    "karma-mocha": "^1.2.0",
+    "karma-phantomjs-launcher": "^1.0.2",
+    "karma-sinon-chai": "^1.2.4",
+    "karma-sourcemap-loader": "^0.3.7",
+    "karma-spec-reporter": "0.0.26",
+    "karma-webpack": "^1.8.0",
+    "lodash.clonedeep": "^4.5.0",
+    "mocha": "^3.0.0",
+    "should": "^10.0.0",
+    "sinon": "^1.17.5",
+    "sinon-chai": "^2.8.0",
+    "source-map-support": "^0.4.2",
+    "webpack": "^1.12.2",
+    "webpack-merge": "^0.14.1"
+  },
+  "dependencies": {
+    "es6-promise": "^3.3.1",
+    "whatwg-fetch": "^1.0.0"
+  }
+}
