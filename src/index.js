@@ -57,7 +57,6 @@ export default class Fresh8 {
    *                         , clickTrackingRedirect: 'http://dfp.com?r='  - optional
    *                         , sport: 'football' - optional
    *                         , matchID: '85623' - optional Opta ID
-   *                         , match: 'Manchester United vs Sauthampton' - optional
    *                         , competitorIDs: ['55436'] - optional Opta ID's
    *                         , competitors: ['Manchester United', 'Sauthampton'] - optinal
    *                         , competitionIDs: ['1245'] - optional Opta ID's
@@ -77,7 +76,6 @@ export default class Fresh8 {
         view,
         clickTrackingRedirect,
         sport,
-        matchID,
         match,
         competitorIDs,
         competitors,
@@ -91,7 +89,6 @@ export default class Fresh8 {
         view,
         clickUrl: clickTrackingRedirect,
         sport,
-        matchId: matchID,
         match,
         competitorIds: competitorIDs,
         competitors,
