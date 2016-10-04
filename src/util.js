@@ -1,7 +1,7 @@
 import { invaildeConfig } from './errors';
 
 /**
- * Returns the window object that this script should inject to
+ * Returns the window object that this script should inject into
  * @param  {Boolean} shouldBreak is whether or not the script should attempt
  *                               to break from iframe.
  * @return {Window} the working window
