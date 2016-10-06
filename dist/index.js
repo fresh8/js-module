@@ -126,7 +126,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	   *                         , clickTrackingRedirect: 'http://dfp.com?r='  - optional
 	   *                         , sport: 'football' - optional
 	   *                         , matchID: '85623' - optional Opta ID
-	   *                         , match: 'Manchester United vs Sauthampton' - optional
 	   *                         , competitorIDs: ['55436'] - optional Opta ID's
 	   *                         , competitors: ['Manchester United', 'Sauthampton'] - optinal
 	   *                         , competitionIDs: ['1245'] - optional Opta ID's
@@ -155,7 +154,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var view = _vaildateRequestAdCon.view;
 	        var clickTrackingRedirect = _vaildateRequestAdCon.clickTrackingRedirect;
 	        var sport = _vaildateRequestAdCon.sport;
-	        var matchID = _vaildateRequestAdCon.matchID;
 	        var match = _vaildateRequestAdCon.match;
 	        var competitorIDs = _vaildateRequestAdCon.competitorIDs;
 	        var competitors = _vaildateRequestAdCon.competitors;
@@ -169,7 +167,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	          view: view,
 	          clickUrl: clickTrackingRedirect,
 	          sport: sport,
-	          matchId: matchID,
 	          match: match,
 	          competitorIds: competitorIDs,
 	          competitors: competitors,
