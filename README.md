@@ -19,7 +19,7 @@ If you want use this in an [React](https://facebook.github.io/react/) app you ca
 
 ### ES2015 Import
 - `npm install fresh8-js-module --save`
-- `import { Fresh8 } from 'fresh8-js-module';`
+- `import Fresh8 from 'fresh8-js-module';`
 
 ### Browser Script
 You can find a minified script that defines the `Fresh8` object globally in `dist/browser.js`.
