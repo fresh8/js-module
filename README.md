@@ -14,15 +14,15 @@ import Fresh8 from 'fresh8/src';
 If you want use this in an [React](https://facebook.github.io/react/) app you can use our prebuilt component [here](https://github.com/fresh8/react-component).
 
 ### Common JS
-- `npm install fresh8 --save`
-- `var Fresh8 = require('fresh8').default;`
+- `npm install fresh8-js-module --save`
+- `var Fresh8 = require('fresh8-js-module').default;`
 
 ### ES2015 Import
-- `npm install fresh8 --save`
-- `import { Fresh8 } from 'fresh8';`
+- `npm install fresh8-js-module --save`
+- `import { Fresh8 } from 'fresh8-js-module';`
 
 ### Browser Script
-You can find a minified script that defines the `Fresh8` object globally in `dist/fresh8.js`.
+You can find a minified script that defines the `Fresh8` object globally in `dist/browser.js`.
 
 ## Installation ID's and Slot ID's
 During your on-boarding process you'll receive a unique set of ID's for the publications, websites and applications you want to display ads on. We refer to these as "installation ID's", each ID is unique to the publication and allows you to control the ads via our console. Along with these you'll also receive a set of slot ID's that determine what sizes of ad creative will be served to your publications, you can see a list of available slots [here](https://console.fresh8.co/ad-slots).

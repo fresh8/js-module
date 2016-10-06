@@ -122,13 +122,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this.window = (0, _util.getWindow)(this.config.shouldBreakOut);
 	    // The cache for data lookups use when loading an ad.
 	    this.adDataCache = [];
-	    // Cached creative factories, this allows us to not real load the script
+	    // Cached creative factories, this allows us to not re-load the script
 	    // for the ads each time.
 	    this.creativeFactoryCache = {};
 	    // Bind the "__f8" object to the current window. This is rquired by our ad
 	    // factories.
 	    (0, _util.bindf8ToWindow)(version, this.window);
-	    // Bind the global event listener that's fired when an ad script is loaded.
+	    // Bind the global event listener that's fired when the ad factory is loaded.
 	    this._addEventLisnter();
 	  }
 	
@@ -234,7 +234,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    /**
 	     * Takes a creative ref and matches it with one in the "adDataCache" data,
-	     * returning an object containing both the index the data was found and the
+	     * returning an object containing both the index the data was found at and the
 	     * data itself.
 	     * @param  {String} ref is the reference to look the data up by
 	     * @return {Object} is the found data + the index or empty object if not found
@@ -257,8 +257,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	
 	    /**
-	     * Takes a creative ref and factory, looks up the data for it and passes the
-	     * factory the data require to load the ad.
+	     * Takes a creative ref and factory, looks up the data from the "adDataCache"
+	     * matching on the ref passed in, then calls the factory with the data.
 	     * @param  {Function} creativeFactory is the function used to load the creative
 	     * @param  {String}   creativeRef     is the creative reference used to look
 	     *                                    the required data.
@@ -296,8 +296,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	
 	    /**
-	     * Event lisnter to the window used for passing data to creatives once the
-	     * script has loaded.
+	     * Handler for the script loaded event that that passes the factory and ref
+	     * to the "loadAd" function.
 	     */
 	
 	  }, {
@@ -319,8 +319,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	
 	    /**
-	     * Builds the request url from the config with the option to add extra key
-	     * values.
+	     * Builds the request URL from the config with the option to add extra
+	     * key/value.
 	     * @param  {Object} options is used for adding extra key values to the URL
 	     *                          as a query strings.
 	     * @return {String}         The constructed URL
@@ -2216,7 +2216,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	var _errors = __webpack_require__(9);
 	
 	/**
-	 * Returns the window object that this script should inject to
+	 * Returns the window object that this script should inject into
 	 * @param  {Boolean} shouldBreak is whether or not the script should attempt
 	 *                               to break from iframe.
 	 * @return {Window} the working window
