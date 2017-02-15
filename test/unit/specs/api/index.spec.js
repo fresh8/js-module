@@ -16,9 +16,11 @@ describe('src/api/index.js', () => {
       fetchStub.returns(Promise.resolve(mockFetchResponse(body)));
 
       const config = { window, endpoint: 'https://fresh8.co/123/raw', slotID: '123' };
-      return requestAdData(config).then(response => {
-        console.log(response);
-      });
+      return requestAdData(config)
+        .then(response => {
+          fetchStub.restore();
+          expect(response).to.deep.equal(body);
+        });
     });
   });
 
