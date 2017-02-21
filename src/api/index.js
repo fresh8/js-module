@@ -1,4 +1,4 @@
-import { buildQueryString, getRef } from '../util';
+import { getRef } from '../util';
 import { invaildeConfig } from '../errors';
 
 /**
@@ -18,7 +18,6 @@ import { invaildeConfig } from '../errors';
  *                         , window: the window used to extra the page ref from
  *                         , inApp: false - optional
  *                         , endpoint: '' - optional
- *                         , appendPoint: 'body' - required
  *                         , url: 'http://fresh8gaming.com' - optional
  *                         }
  * @return {Promise}
@@ -117,8 +116,8 @@ export function vaildateRequestAdConf (config = {}) {
     throw invaildeConfig('Missing "slotID"');
   }
 
-  if (typeof config.appendPoint === 'undefined' || config.appendPoint === '') {
-    throw invaildeConfig('Missing "appendPoint"');
+  if (typeof config.window === 'undefined' || config.window === '') {
+    throw invaildeConfig('Missing "window"');
   }
 
   if (typeof config.inApp === 'undefined') {
@@ -154,4 +153,26 @@ export function vaildateRequestAdConf (config = {}) {
   }
 
   return config;
+}
+
+/**
+ * Takes a dictionary and converts it to a queryString
+ * @param  {Object} dictionary is a dictionary of string key's to
+ *                             string values.
+ * @return {String} a queryString in the form of `?key=val&keyTwo=valTwo`.
+ */
+export function buildQueryString (options) {
+  var queryString = '?';
+  Object.keys(options).forEach(function (option) {
+    var value = options[option];
+    if (value && value !== '' && value.length !== 0) {
+      if (Object.prototype.toString.call(value) === '[object Array]') {
+        queryString += option + '=' + value.join(',') + '&';
+      } else {
+        queryString += option + '=' + value + '&';
+      }
+    }
+  });
+
+  return queryString;
 }
