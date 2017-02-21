@@ -62,53 +62,6 @@ export function getRef (window, inApp, userOverrideRef) {
 }
 
 /**
- * Takes a dictionary and converts it to a queryString
- * @param  {Object} dictionary is a dictionary of string key's to
- *                             string values.
- * @return {String} a queryString in the form of `?key=val&keyTwo=valTwo`.
- */
-export function buildQueryString (options) {
-  var queryString = '?';
-  Object.keys(options).forEach(function (option) {
-    var value = options[option];
-    if (value && value !== '' && value.length !== 0) {
-      if (Object.prototype.toString.call(value) === '[object Array]') {
-        queryString += option + '=' + value.join(',') + '&';
-      } else {
-        queryString += option + '=' + value + '&';
-      }
-    }
-  });
-
-  return queryString;
-}
-
-/**
- * Checks the stats code on a response and rejects the promise chain if
- * less than 200 or greater than 300.
- * @param  {Object} response is the fetch response object
- * @return {(Promise.reject|Object)} a rejected promise or the reponse object
- */
-export function checkStatusCode (response) {
-  if (response.status >= 200 && response.status < 300) {
-    return response;
-  }
-
-  return Promise.reject('Server returned error: ' + response.status);
-}
-
-/**
- * Returns the json from a fetch request
- * @param  {Object} response is the fetch response object
- * @return {Object} the parsed JSON object
- */
-export function parseJSON (response) {
-  if (response) {
-    return response.json();
-  }
-}
-
-/**
  * Binds the "__f8" object and API to the window
  * @param {String} version      is the version to bind the API under
  * @param {Object} targetWindow is window to bind the "__f8" object to
@@ -160,43 +113,6 @@ export function injectScriptFactory (creativeSource) {
 }
 
 /**
- * Takes a requestAd conf object and vaildates it
- * @param  {Object} config is the user defined config object
- * @return {Object}        the vaildated object
- */
-export function vaildateRequestAdConf (config = {}) {
-  if (typeof config.slotID === 'undefined' || config.slotID === '') {
-    throw invaildeConfig('Missing "slotID"');
-  }
-
-  if (typeof config.appendPoint === 'undefined' || config.appendPoint === '') {
-    throw invaildeConfig('Missing "appendPoint"');
-  }
-
-  if (typeof config.competitorIDs === 'undefined') {
-    config.competitorIDs = [];
-  }
-
-  if (typeof config.competitors === 'undefined') {
-    config.competitors = [];
-  }
-
-  if (typeof config.competitionIDs === 'undefined') {
-    config.competitionIDs = [];
-  }
-
-  if (typeof config.competitions === 'undefined') {
-    config.competitions = [];
-  }
-
-  if ((config.competitors.length !== 0 || config.competitions.length !== 0) && !config.sport) {
-    throw invaildeConfig('Sport is required if "competitions" or "competitors" is passed through in the config');
-  }
-
-  return config;
-}
-
-/**
  * Takes a config object and vaildates it
  * @param  {Object} config is the user defined config object
  * @return {Object}        the vaildated object
@@ -216,6 +132,10 @@ export function vaildateConfig (config = {}) {
 
   if (typeof config.shouldBreakOut === 'undefined') {
     config.shouldBreakOut = false;
+  }
+
+  if (typeof config.listenOnPushState === 'undefined') {
+    config.listenOnPushState = false;
   }
 
   return config;
