@@ -51,10 +51,23 @@ This defines if the ads are being used inside of a web view in Android/iOS.
 |---------|---------|----------|---------|
 | `inApp` | Boolean | N        | `false` |
 
+#### `listenOnPushState`
+Monkey patches the `window.history.pushState` function to emit an event, on receipt of this event the ads will reload. Useful for single page apps that don't reload the page on navigation.
+
+| Key                 | Value   | Required | Default |
+|---------------------|---------|----------|---------|
+| `listenOnPushState` | Boolean | N        | `false` |
+
 ## Methods
 
 ### `remove()`
-Removes any event listeners added by the class.
+Removes any event listeners added by the class and destroys any ads on the page.
+
+### `destroyAllAds()`
+Removes all ads from the page.
+
+### `reloadAllAds()`
+Refreshes all the currently active ads on the page and returns promise that resolves with an array of ads.
 
 ### `requestAd(config)`
 requestAd method takes a number of different configurations as an `Object` and returns a promise. The following lists each available option and what it does:
@@ -63,7 +76,7 @@ requestAd method takes a number of different configurations as an `Object` and r
 The slot size that you'd like to request an for.
 
 | Name     | Type   | Required | Default     |
-|----------|------- |----------|-------------|
+|----------|--------|----------|-------------|
 | `slotID` | String | Y        | `undefined` |
 
 #### `appendPoint`
@@ -140,6 +153,17 @@ An optional competitions array used for targeting overrides, for example `['Prem
 |----------------|-------|----------|---------|
 | `competitions` | Array | X        | `[]`    |
 
+## Ad class
+An instantiated ad class is resolved from the `requestAd` method on success
+
+### Methods
+
+#### `reload`
+Reloads destroys the current ad in place then requests new data from the ad serving API. Using that data it creates a new ad in it's place.
+
+#### `destroy`
+Removes the ad from the DOM and cleans up any event listens and scripts added.
+
 ## Examples
 This is an example of the simplest configuration possible:
 ```
@@ -148,10 +172,10 @@ var fresh8 = new Fresh8(config);
 
 fresh8.requestAd({ slotID: 'f8-001', appendPoint: 'body' });
 ```
-A more complex config might look like:
 
+A more complex config might look like:
 ```
-var config = { instID: '40410', inApp: false, shouldBreakOut: false };
+var config = { instID: '40410', inApp: false, shouldBreakOut: false, listenOnPushState: false };
 var fresh8 = new Fresh8(config);
 
 fresh8
@@ -163,9 +187,10 @@ fresh8
     clickTrackingRedirect: 'http://dfp.com?r=',
     sport: 'football',
     competitors: ['Manchester United', 'Southampton'],
-    competitions: ['Premier League']
+    competitions: ['Premier League'],
+    listenOnPushState: true
   })
-  .then(() => console.log('Ad loaded'))
+  .then(ad => console.log('Ad loaded', ad))
   .catch(reason => console.error(reason));
 ```
 

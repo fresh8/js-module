@@ -67,19 +67,27 @@ return /******/ (function(modules) { // webpackBootstrap
 	  value: true
 	});
 	
-	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
-	
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 	
 	__webpack_require__(5);
 	
-	var _polyfill = __webpack_require__(6);
+	var _ad = __webpack_require__(6);
 	
-	var _util = __webpack_require__(7);
+	var _ad2 = _interopRequireDefault(_ad);
+	
+	var _cache = __webpack_require__(10);
+	
+	var _cache2 = _interopRequireDefault(_cache);
+	
+	var _polyfill = __webpack_require__(11);
+	
+	var _util = __webpack_require__(8);
+	
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
-	var version = '1.0.0';
+	var version = '1.1.0';
 	
 	var Fresh8 = function () {
 	  /**
@@ -88,6 +96,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   * @param {Object} config is the global instance configurations E.G.
 	   *                        { instID: '54ad56a213fe19232b646047'
 	   *                        , shouldBreakOut: false  - optinal
+	   *                        , listenOnPushState: false - optinal
 	   *                        , inApp: false - optional
 	   *                        , endpoint: '' - optional
 	   *                        }
@@ -97,22 +106,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	  function Fresh8(config) {
 	    _classCallCheck(this, Fresh8);
 	
-	    // Pollyfills
+	    // Ad class
+	    this.Ad = _ad2.default;
+	    // Adds polyfills for custome events.
 	    (0, _polyfill.customEvent)();
 	    // The vaildated user config.
 	    this.config = (0, _util.vaildateConfig)(config);
 	    // The window that should be used to append the ad to.
 	    this.window = (0, _util.getWindow)(this.config.shouldBreakOut);
-	    // The cache for data lookups use when loading an ad.
-	    this.adDataCache = [];
-	    // Cached creative factories, this allows us to not re-load the script
-	    // for the ads each time.
-	    this.creativeFactoryCache = {};
+	    // A store for the currently loaded ads.
+	    this.ads = [];
+	    // Cache for the creative factories.
+	    this.creativeFactoryCache = new _cache2.default();
 	    // Bind the "__f8" object to the current window. This is rquired by our ad
 	    // factories.
 	    (0, _util.bindf8ToWindow)(version, this.window);
 	    // Bind the global event listener that's fired when the ad factory is loaded.
-	    this._addEventLisnter();
+	    this._addEventLisnters();
+	    // Bind a custome event for push state changes.
+	    if (this.config.listenOnPushState) {
+	      this.polyfillHistoryPushState = new _polyfill.PolyfillHistoryPushState();
+	      this.polyfillHistoryPushState.fill();
+	    }
 	  }
 	
 	  /**
@@ -127,7 +142,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   *                         , sport: 'football' - optional
 	   *                         , matchID: '85623' - optional Opta ID
 	   *                         , competitorIDs: ['55436'] - optional Opta ID's
-	   *                         , competitors: ['Manchester United', 'Sauthampton'] - optinal
+	   *                         , competitors: ['Manchester United', 'Southampton'] - optinal
 	   *                         , competitionIDs: ['1245'] - optional Opta ID's
 	   *                         , competitions: ['Premier League'] - optional
 	   *                         }
@@ -143,206 +158,131 @@ return /******/ (function(modules) { // webpackBootstrap
 	    value: function requestAd() {
 	      var _this = this;
 	
-	      var config = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+	      var config = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 	
-	      return new Promise(function (resolve, reject) {
-	        var _vaildateRequestAdCon = (0, _util.vaildateRequestAdConf)(config);
-	
-	        var slotID = _vaildateRequestAdCon.slotID;
-	        var appendPoint = _vaildateRequestAdCon.appendPoint;
-	        var url = _vaildateRequestAdCon.url;
-	        var view = _vaildateRequestAdCon.view;
-	        var clickTrackingRedirect = _vaildateRequestAdCon.clickTrackingRedirect;
-	        var sport = _vaildateRequestAdCon.sport;
-	        var match = _vaildateRequestAdCon.match;
-	        var competitorIDs = _vaildateRequestAdCon.competitorIDs;
-	        var competitors = _vaildateRequestAdCon.competitors;
-	        var competitionIDs = _vaildateRequestAdCon.competitionIDs;
-	        var competitions = _vaildateRequestAdCon.competitions;
-	
-	        // Build the end point URL with the slot ID
-	
-	        var endpoint = _this._constructRequestURL({
-	          slot: slotID,
-	          view: view,
-	          clickUrl: clickTrackingRedirect,
-	          sport: sport,
-	          match: match,
-	          competitorIds: competitorIDs,
-	          competitors: competitors,
-	          competitionIds: competitionIDs,
-	          competitions: competitions,
-	          ref: (0, _util.getRef)(_this.window, _this.config.inApp, url)
-	        });
-	
-	        return fetch(endpoint).then(_util.checkStatusCode).then(_util.parseJSON).then(function (payload) {
-	          var adData = {
-	            payload: payload,
-	            appendPoint: appendPoint,
-	            resolve: resolve,
-	            reject: reject
-	          };
-	
-	          // Cache the ad data for the factory.
-	          _this.adDataCache.push(adData);
-	
-	          // Inject the scripts for each Ad.
-	          Object.keys(payload).forEach(function (creativeRef) {
-	            // Pass the data directly to the ad if we already have it's factory
-	            // cached.
-	            if (_this.creativeFactoryCache[creativeRef]) {
-	              _this._loadAd(_this.creativeFactoryCache[creativeRef], creativeRef);
-	              // Else just script for the ad factory and pass the data too it once
-	              // the loaded event has been emited.
-	            } else {
-	              (0, _util.injectScriptFactory)(payload[creativeRef].creativePath);
-	            }
-	          });
-	        });
+	      return new Promise(function (resolve) {
+	        // Add Fresh8 class data to request ad config
+	        config.endpoint = _this.config.endpoint;
+	        config.window = _this.window;
+	        config.creativeFactoryCache = _this.creativeFactoryCache;
+	        // Create a new ad and
+	        var ad = new _this.Ad(config);
+	        // Store the ad for reference
+	        _this.ads.push(ad);
+	        // Load the ad a return the promise
+	        return resolve(ad.load());
 	      });
 	    }
 	
 	    /**
-	     * Cleans up any event lisnters added by the class
+	     * Cleans up any event lisnters/ads added by the class
 	     */
 	
 	  }, {
 	    key: 'remove',
 	    value: function remove() {
-	      this._removeEventLisnter();
+	      // Remove any added event lisnters
+	      this._removeEventLisnters();
+	      // Remove all the ads from the page
+	      this.destroyAllAds();
+	      // Restore the patch history push state
+	      if (this.config.listenOnPushState) {
+	        this.polyfillHistoryPushState.restore();
+	      }
 	    }
 	
 	    /**
-	     * Takes a creative ref and matches it with one in the "adDataCache" data,
-	     * returning an object containing both the index the data was found at and the
-	     * data itself.
-	     * @param  {String} ref is the reference to look the data up by
-	     * @return {Object} is the found data + the index or empty object if not found
+	     * Reloads all the currently active ads on the page
+	     * @return {Promise} containing references to the new ads
 	     */
 	
 	  }, {
-	    key: '_lookUpAdData',
-	    value: function _lookUpAdData(ref) {
-	      var matchedData = {};
+	    key: 'reloadAllAds',
+	    value: function reloadAllAds() {
+	      var activeAds = this.ads.filter(function (ad) {
+	        return ad.active;
+	      });
+	      return Promise.all(activeAds.map(function (ad) {
+	        return ad.reload();
+	      }));
+	    }
 	
-	      this.adDataCache.forEach(function (ad, index) {
-	        var creativesRefs = Object.keys(ad.payload);
-	        if (creativesRefs.indexOf(ref) >= 0) {
-	          matchedData = { ad: ad, index: index };
-	          return;
+	    /**
+	     * Destroys all currently active ads on the page
+	     * @return {Promise} resolves on completion
+	     */
+	
+	  }, {
+	    key: 'destroyAllAds',
+	    value: function destroyAllAds() {
+	      var activeAds = this.ads.filter(function (ad) {
+	        return ad.active;
+	      });
+	      return Promise.all(activeAds.map(function (ad) {
+	        return ad.destroy();
+	      }));
+	    }
+	
+	    /**
+	     * Adds the "__f8-creative-script-loaded" and "__f8-history-push-state" event
+	     * lisnters to the window
+	     */
+	
+	  }, {
+	    key: '_addEventLisnters',
+	    value: function _addEventLisnters() {
+	      this.boundOnCreativeLoaded = this._onCreativeLoaded.bind(this);
+	      this.boundOnHistoryPushStateChange = this._onHistoryPushStateChange.bind(this);
+	      this.window.addEventListener('__f8-creative-script-loaded', this.boundOnCreativeLoaded);
+	      this.window.addEventListener('__f8-history-push-state', this.boundOnHistoryPushStateChange);
+	    }
+	
+	    /**
+	     * Removes the "__f8-creative-script-loaded" and "__f8-history-push-state" event
+	     * lisnters from the window
+	     */
+	
+	  }, {
+	    key: '_removeEventLisnters',
+	    value: function _removeEventLisnters() {
+	      this.window.removeEventListener('__f8-creative-script-loaded', this.boundOnCreativeLoaded);
+	      this.window.removeEventListener('__f8-history-push-state', this.boundOnHistoryPushStateChange);
+	    }
+	
+	    /**
+	     * Handler for the script loaded event and set the creative factory on any
+	     * ads that match the creative ref and are waiting for a creativeFactory.
+	     * @param {Object} event is a custom event object
+	     */
+	
+	  }, {
+	    key: '_onCreativeLoaded',
+	    value: function _onCreativeLoaded(event) {
+	      // Cache the creative factory so we can re used it for other ads
+	      this.creativeFactoryCache.put(event.creativeRef, event.creativeFactory);
+	
+	      // Loop over the ads and check if any that require a creative factory
+	      // with the matching creative ref
+	      this.ads.forEach(function (ad) {
+	        if (ad.awaitingFactory && event.creativeRef === ad.creativeRef) {
+	          // Set the creative factory
+	          ad._setCreativeFactory(event.creativeFactory);
+	          // Call the creative factory loading the ad onto the page
+	          ad._callCreativeFactory();
 	        }
 	      });
-	
-	      return matchedData;
 	    }
 	
 	    /**
-	     * Takes a creative ref and factory, looks up the data from the "adDataCache"
-	     * matching on the ref passed in, then calls the factory with the data.
-	     * @param  {Function} creativeFactory is the function used to load the creative
-	     * @param  {String}   creativeRef     is the creative reference used to look
-	     *                                    the required data.
+	     * Handles the push state change evnet that reloads all the currently active
+	     * ads on the page
+	     * @param {Object} event is a custom event object
 	     */
 	
 	  }, {
-	    key: '_loadAd',
-	    value: function _loadAd(creativeFactory, creativeRef) {
-	      var _lookUpAdData2 = this._lookUpAdData(creativeRef);
-	
-	      var ad = _lookUpAdData2.ad;
-	      var index = _lookUpAdData2.index;
-	
-	
-	      if (ad && ad.payload[creativeRef]) {
-	        this.adDataCache.splice(index, 1);
-	        var CSSPath = ad.payload[creativeRef].CSSPath;
-	        var instance = ad.payload[creativeRef].instances[0];
-	
-	        instance.data.appendPoint = ad.appendPoint;
-	        creativeFactory(instance.env, instance.data, CSSPath);
-	        ad.resolve();
-	      }
-	    }
-	
-	    /**
-	     * Adds a "__f8-creative-script-loaded" event lisnter to the window
-	     */
-	
-	  }, {
-	    key: '_addEventLisnter',
-	    value: function _addEventLisnter() {
-	      this.boundEventListner = this._eventListener.bind(this);
-	      window.addEventListener('__f8-creative-script-loaded', this.boundEventListner);
-	    }
-	
-	    /**
-	     * Handler for the script loaded event that that passes the factory and ref
-	     * to the "loadAd" function.
-	     */
-	
-	  }, {
-	    key: '_eventListener',
-	    value: function _eventListener(event) {
-	      // Cache the creative factory so we can re used it later
-	      this.creativeFactoryCache[event.creativeRef] = event.creativeFactory;
-	      this._loadAd(event.creativeFactory, event.creativeRef);
-	    }
-	
-	    /**
-	     * Removes the "__f8-creative-script-loaded" event lisnter from the window
-	     */
-	
-	  }, {
-	    key: '_removeEventLisnter',
-	    value: function _removeEventLisnter() {
-	      window.removeEventListener('__f8-creative-script-loaded', this.boundEventListner);
-	    }
-	
-	    /**
-	     * Builds the request URL from the config with the option to add extra
-	     * key/value.
-	     * @param  {Object} options is used for adding extra key values to the URL
-	     *                          as a query strings.
-	     * @return {String}         The constructed URL
-	     */
-	
-	  }, {
-	    key: '_constructRequestURL',
-	    value: function _constructRequestURL() {
-	      var options = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-	
-	      var queryStringsOptions = _extends({}, options);
-	
-	      queryStringsOptions.inApp = this.config.inApp;
-	      queryStringsOptions.shouldBreakOut = this.config.shouldBreakOut;
-	
-	      if (typeof queryStringsOptions.competitorIds !== 'undefined') {
-	        queryStringsOptions.competitorIds = queryStringsOptions.competitorIds.map(function (value) {
-	          return encodeURIComponent(value);
-	        });
-	      }
-	
-	      if (typeof queryStringsOptions.competitors !== 'undefined') {
-	        queryStringsOptions.competitors = queryStringsOptions.competitors.map(function (value) {
-	          return encodeURIComponent(value);
-	        });
-	      }
-	
-	      if (typeof queryStringsOptions.competitionIds !== 'undefined') {
-	        queryStringsOptions.competitionIds = queryStringsOptions.competitionIds.map(function (value) {
-	          return encodeURIComponent(value);
-	        });
-	      }
-	
-	      if (typeof queryStringsOptions.competitions !== 'undefined') {
-	        queryStringsOptions.competitions = queryStringsOptions.competitions.map(function (value) {
-	          return encodeURIComponent(value);
-	        });
-	      }
-	
-	      var queryString = (0, _util.buildQueryString)(queryStringsOptions);
-	
-	      return this.config.endpoint + queryString;
+	    key: '_onHistoryPushStateChange',
+	    value: function _onHistoryPushStateChange(event) {
+	      this.reloadAllAds();
 	    }
 	  }]);
 	
@@ -1730,6 +1670,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	    arrayBuffer: 'ArrayBuffer' in self
 	  }
 	
+	  if (support.arrayBuffer) {
+	    var viewClasses = [
+	      '[object Int8Array]',
+	      '[object Uint8Array]',
+	      '[object Uint8ClampedArray]',
+	      '[object Int16Array]',
+	      '[object Uint16Array]',
+	      '[object Int32Array]',
+	      '[object Uint32Array]',
+	      '[object Float32Array]',
+	      '[object Float64Array]'
+	    ]
+	
+	    var isDataView = function(obj) {
+	      return obj && DataView.prototype.isPrototypeOf(obj)
+	    }
+	
+	    var isArrayBufferView = ArrayBuffer.isView || function(obj) {
+	      return obj && viewClasses.indexOf(Object.prototype.toString.call(obj)) > -1
+	    }
+	  }
+	
 	  function normalizeName(name) {
 	    if (typeof name !== 'string') {
 	      name = String(name)
@@ -1862,14 +1824,36 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	  function readBlobAsArrayBuffer(blob) {
 	    var reader = new FileReader()
+	    var promise = fileReaderReady(reader)
 	    reader.readAsArrayBuffer(blob)
-	    return fileReaderReady(reader)
+	    return promise
 	  }
 	
 	  function readBlobAsText(blob) {
 	    var reader = new FileReader()
+	    var promise = fileReaderReady(reader)
 	    reader.readAsText(blob)
-	    return fileReaderReady(reader)
+	    return promise
+	  }
+	
+	  function readArrayBufferAsText(buf) {
+	    var view = new Uint8Array(buf)
+	    var chars = new Array(view.length)
+	
+	    for (var i = 0; i < view.length; i++) {
+	      chars[i] = String.fromCharCode(view[i])
+	    }
+	    return chars.join('')
+	  }
+	
+	  function bufferClone(buf) {
+	    if (buf.slice) {
+	      return buf.slice(0)
+	    } else {
+	      var view = new Uint8Array(buf.byteLength)
+	      view.set(new Uint8Array(buf))
+	      return view.buffer
+	    }
 	  }
 	
 	  function Body() {
@@ -1877,7 +1861,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    this._initBody = function(body) {
 	      this._bodyInit = body
-	      if (typeof body === 'string') {
+	      if (!body) {
+	        this._bodyText = ''
+	      } else if (typeof body === 'string') {
 	        this._bodyText = body
 	      } else if (support.blob && Blob.prototype.isPrototypeOf(body)) {
 	        this._bodyBlob = body
@@ -1885,11 +1871,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	        this._bodyFormData = body
 	      } else if (support.searchParams && URLSearchParams.prototype.isPrototypeOf(body)) {
 	        this._bodyText = body.toString()
-	      } else if (!body) {
-	        this._bodyText = ''
-	      } else if (support.arrayBuffer && ArrayBuffer.prototype.isPrototypeOf(body)) {
-	        // Only support ArrayBuffers for POST method.
-	        // Receiving ArrayBuffers happens via Blobs, instead.
+	      } else if (support.arrayBuffer && support.blob && isDataView(body)) {
+	        this._bodyArrayBuffer = bufferClone(body.buffer)
+	        // IE 10-11 can't handle a DataView body.
+	        this._bodyInit = new Blob([this._bodyArrayBuffer])
+	      } else if (support.arrayBuffer && (ArrayBuffer.prototype.isPrototypeOf(body) || isArrayBufferView(body))) {
+	        this._bodyArrayBuffer = bufferClone(body)
 	      } else {
 	        throw new Error('unsupported BodyInit type')
 	      }
@@ -1914,6 +1901,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	        if (this._bodyBlob) {
 	          return Promise.resolve(this._bodyBlob)
+	        } else if (this._bodyArrayBuffer) {
+	          return Promise.resolve(new Blob([this._bodyArrayBuffer]))
 	        } else if (this._bodyFormData) {
 	          throw new Error('could not read FormData body as blob')
 	        } else {
@@ -1922,27 +1911,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	
 	      this.arrayBuffer = function() {
-	        return this.blob().then(readBlobAsArrayBuffer)
-	      }
-	
-	      this.text = function() {
-	        var rejected = consumed(this)
-	        if (rejected) {
-	          return rejected
-	        }
-	
-	        if (this._bodyBlob) {
-	          return readBlobAsText(this._bodyBlob)
-	        } else if (this._bodyFormData) {
-	          throw new Error('could not read FormData body as text')
+	        if (this._bodyArrayBuffer) {
+	          return consumed(this) || Promise.resolve(this._bodyArrayBuffer)
 	        } else {
-	          return Promise.resolve(this._bodyText)
+	          return this.blob().then(readBlobAsArrayBuffer)
 	        }
 	      }
-	    } else {
-	      this.text = function() {
-	        var rejected = consumed(this)
-	        return rejected ? rejected : Promise.resolve(this._bodyText)
+	    }
+	
+	    this.text = function() {
+	      var rejected = consumed(this)
+	      if (rejected) {
+	        return rejected
+	      }
+	
+	      if (this._bodyBlob) {
+	        return readBlobAsText(this._bodyBlob)
+	      } else if (this._bodyArrayBuffer) {
+	        return Promise.resolve(readArrayBufferAsText(this._bodyArrayBuffer))
+	      } else if (this._bodyFormData) {
+	        throw new Error('could not read FormData body as text')
+	      } else {
+	        return Promise.resolve(this._bodyText)
 	      }
 	    }
 	
@@ -1970,7 +1960,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	  function Request(input, options) {
 	    options = options || {}
 	    var body = options.body
-	    if (Request.prototype.isPrototypeOf(input)) {
+	
+	    if (typeof input === 'string') {
+	      this.url = input
+	    } else {
 	      if (input.bodyUsed) {
 	        throw new TypeError('Already read')
 	      }
@@ -1981,12 +1974,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	      }
 	      this.method = input.method
 	      this.mode = input.mode
-	      if (!body) {
+	      if (!body && input._bodyInit != null) {
 	        body = input._bodyInit
 	        input.bodyUsed = true
 	      }
-	    } else {
-	      this.url = input
 	    }
 	
 	    this.credentials = options.credentials || this.credentials || 'omit'
@@ -2004,7 +1995,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	
 	  Request.prototype.clone = function() {
-	    return new Request(this)
+	    return new Request(this, { body: this._bodyInit })
 	  }
 	
 	  function decode(body) {
@@ -2020,16 +2011,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return form
 	  }
 	
-	  function headers(xhr) {
-	    var head = new Headers()
-	    var pairs = (xhr.getAllResponseHeaders() || '').trim().split('\n')
-	    pairs.forEach(function(header) {
-	      var split = header.trim().split(':')
-	      var key = split.shift().trim()
-	      var value = split.join(':').trim()
-	      head.append(key, value)
+	  function parseHeaders(rawHeaders) {
+	    var headers = new Headers()
+	    rawHeaders.split('\r\n').forEach(function(line) {
+	      var parts = line.split(':')
+	      var key = parts.shift().trim()
+	      if (key) {
+	        var value = parts.join(':').trim()
+	        headers.append(key, value)
+	      }
 	    })
-	    return head
+	    return headers
 	  }
 	
 	  Body.call(Request.prototype)
@@ -2040,10 +2032,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	
 	    this.type = 'default'
-	    this.status = options.status
+	    this.status = 'status' in options ? options.status : 200
 	    this.ok = this.status >= 200 && this.status < 300
-	    this.statusText = options.statusText
-	    this.headers = options.headers instanceof Headers ? options.headers : new Headers(options.headers)
+	    this.statusText = 'statusText' in options ? options.statusText : 'OK'
+	    this.headers = new Headers(options.headers)
 	    this.url = options.url || ''
 	    this._initBody(bodyInit)
 	  }
@@ -2081,35 +2073,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	  self.fetch = function(input, init) {
 	    return new Promise(function(resolve, reject) {
-	      var request
-	      if (Request.prototype.isPrototypeOf(input) && !init) {
-	        request = input
-	      } else {
-	        request = new Request(input, init)
-	      }
-	
+	      var request = new Request(input, init)
 	      var xhr = new XMLHttpRequest()
-	
-	      function responseURL() {
-	        if ('responseURL' in xhr) {
-	          return xhr.responseURL
-	        }
-	
-	        // Avoid security warnings on getResponseHeader when not allowed by CORS
-	        if (/^X-Request-URL:/m.test(xhr.getAllResponseHeaders())) {
-	          return xhr.getResponseHeader('X-Request-URL')
-	        }
-	
-	        return
-	      }
 	
 	      xhr.onload = function() {
 	        var options = {
 	          status: xhr.status,
 	          statusText: xhr.statusText,
-	          headers: headers(xhr),
-	          url: responseURL()
+	          headers: parseHeaders(xhr.getAllResponseHeaders() || '')
 	        }
+	        options.url = 'responseURL' in xhr ? xhr.responseURL : options.headers.get('X-Request-URL')
 	        var body = 'response' in xhr ? xhr.response : xhr.responseText
 	        resolve(new Response(body, options))
 	      }
@@ -2146,33 +2119,368 @@ return /******/ (function(modules) { // webpackBootstrap
 
 /***/ },
 /* 6 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
-	'use strict';
+	/* WEBPACK VAR INJECTION */(function(Promise) {'use strict';
 	
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.customEvent = customEvent;
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	exports.vaildateConfig = vaildateConfig;
+	
+	var _api = __webpack_require__(7);
+	
+	var _util = __webpack_require__(8);
+	
+	var _errors = __webpack_require__(9);
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	var Ad = function () {
+	  /**
+	   * A class for managing and loading a single ad
+	   * @param {Object} config is the configurations used to make the API reqeuest
+	   *                        { slotID: 'f8-001'
+	   *                        , creativeFactoryCache: new Cache() - used for
+	   *                          global cache factory look ups
+	   *                       , view: 'home-page' - optional
+	   *                       , clickTrackingRedirect: 'http://dfp.com?r=' - optional
+	   *                       , sport: 'football' - optional
+	   *                       , matchID: '85623' - optional Opta ID
+	   *                       , competitorIDs: ['55436'] - optional Opta ID's
+	   *                       , competitors: ['Manchester United', 'Southampton'] - optinal
+	   *                       , competitionIDs: ['1245'] - optional Opta ID's
+	   *                       , competitions: ['Premier League'] - optional
+	   *                       , window: the window used to extra the page ref from
+	   *                       , inApp: false - optional
+	   *                       , endpoint: '' - optional
+	   *                       , appendPoint: 'body' - required
+	   *                       , url: 'http://fresh8gaming.com' - optional
+	   *                       }
+	   */
+	  function Ad() {
+	    var config = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+	
+	    _classCallCheck(this, Ad);
+	
+	    // Use to indercate if the ad has been distroyed.
+	    this.active = true;
+	    // awaitingFactory is used when slecting what ad classes require an creative
+	    // factory.
+	    this.awaitingFactory = true;
+	    // selector is use for selecting the ad in the DOM and is set by the "load"
+	    // method.
+	    this.selector = null;
+	    // creativeRef this the creative type. Set by the "load" method and updated
+	    // by the "_reload" method.
+	    this.creativeRef = null;
+	    // creativePath is the path to the js file needed to load the ad. Set by the
+	    // "load" method and updated by the "_reload" method.
+	    this.creativePath = null;
+	    // CSSPath is the path to the CSS file needed to load the brand. Set by the
+	    // "load" method and updated by the "_reload" method.
+	    this.CSSPath = null;
+	    // data is the payload data for the ad factory. Set by the "load" method
+	    // and updated by the "_reload" method.
+	    this.data = null;
+	    // env is the payload data for the ad factory. Set by the "load" method and
+	    // updated by the "_reload" method.
+	    this.env = null;
+	    // loadResolvers env data for the ad factory. Set by the "load" method and
+	    // updated by the "_reload" method.
+	    this.loadResolvers = null;
+	    // adInstance is a refernce to the ad instance loaded by the creative factory.
+	    // Set by the "load" method and updated by the "_reload" method.
+	    this.adInstance = null;
+	    // config for the ad class.
+	    this.config = vaildateConfig(config);
+	    // creativeFactoryCache is the global cache for the creative factories.
+	    this.creativeFactoryCache = config.creativeFactoryCache;
+	    // window is a refernce to the window object used when make API requests.
+	    this.window = config.window;
+	  }
+	
+	  /**
+	   * Fetches the data for the ad and loads the ad on the page while updating a
+	   * lot the ad's state.
+	   * @return {Promise} Resolve when the ad finishes loading and returns an
+	   *                   instance of the ad class.
+	   */
+	
+	
+	  _createClass(Ad, [{
+	    key: 'load',
+	    value: function load() {
+	      var _this = this;
+	
+	      return new Promise(function (resolve, reject) {
+	        // Construct the object for the request data
+	        var requestConfig = {
+	          slotID: _this.config.slotID,
+	          view: _this.config.view,
+	          clickTrackingRedirect: _this.config.clickTrackingRedirect,
+	          sport: _this.config.sport,
+	          match: _this.config.match,
+	          competitorIDs: _this.config.competitorIDs,
+	          competitors: _this.config.competitors,
+	          competitionIDs: _this.config.competitionIDs,
+	          competitions: _this.config.competitions,
+	          window: _this.config.window,
+	          inApp: _this.config.inApp,
+	          endpoint: _this.config.endpoint,
+	          appendPoint: _this.config.appendPoint,
+	          url: _this.config.url
+	        };
+	
+	        // Make the API request to the ad server
+	        (0, _api.requestAdData)(requestConfig).then(function (payload) {
+	          var resolvers = {
+	            resolve: resolve,
+	            reject: reject
+	          };
+	
+	          // Save the promise so it can be revoled after the creative script
+	          // has loaded.
+	          _this.loadResolvers = resolvers;
+	
+	          // Inject the scripts for each ad.
+	          Object.keys(payload).forEach(function (creativeRef) {
+	            _this.creativeRef = creativeRef;
+	            _this.CSSPath = payload[creativeRef].CSSPath;
+	            _this.data = payload[creativeRef].instances[0].data;
+	            _this.env = payload[creativeRef].instances[0].env;
+	            _this.creativePath = payload[creativeRef].creativePath;
+	            _this.data.appendPoint = _this.config.appendPoint;
+	            _this.selector = _this.config.appendPoint + ' .f8' + _this.creativeRef;
+	
+	            // Pass the data directly to the ad if we already have it's factory
+	            // cached.
+	            if (!_this.awaitingFactory) {
+	              _this._callCreativeFactory();
+	              // Else just script for the ad factory and pass the data too it once
+	              // the loaded event has been emited.
+	            } else {
+	              // Inject the ad factory script and wait for the load event
+	              (0, _util.injectScriptFactory)(_this.creativePath);
+	            }
+	          });
+	        }).catch(reject);
+	      });
+	    }
+	
+	    /**
+	     * Reloads first destroys the current ad in place then requests new data
+	     * from the ad serving API, if the creative ref exists in the factory cache
+	     * then it's loaded. If not a new script is injected into the page and once
+	     * loaded will be called by the ad.
+	     * @return {Promise} Resolve when the ad finishes loading
+	     */
+	
+	  }, {
+	    key: 'reload',
+	    value: function reload() {
+	      var _this2 = this;
+	
+	      return new Promise(function (resolve, reject) {
+	        var requestConfig = {
+	          slotID: _this2.config.slotID,
+	          view: _this2.config.view,
+	          clickTrackingRedirect: _this2.config.clickTrackingRedirect,
+	          sport: _this2.config.sport,
+	          match: _this2.config.match,
+	          competitorIDs: _this2.config.competitorIDs,
+	          competitors: _this2.config.competitors,
+	          competitionIDs: _this2.config.competitionIDs,
+	          competitions: _this2.config.competitions,
+	          window: _this2.config.window,
+	          inApp: _this2.config.inApp,
+	          endpoint: _this2.config.endpoint,
+	          appendPoint: _this2.config.appendPoint,
+	          url: _this2.config.url
+	        };
+	
+	        // Request the ad data
+	        (0, _api.requestAdData)(requestConfig).then(function (payload) {
+	          // Grab the creative ref from the playload
+	          var creativeRef = Object.keys(payload)[0];
+	          var resolvers = {
+	            resolve: resolve,
+	            reject: reject
+	          };
+	
+	          // Save the promises incase they need to be resolved by the inject
+	          // script.
+	          _this2.loadResolvers = resolvers;
+	          // Distroy the current ad in place.
+	          _this2.destroy();
+	          // If the creative type has changed then switch the ad type and update
+	          // the currently set creative ref/creative path in the class.
+	          if (creativeRef !== _this2.creativeRef) {
+	            _this2.creativeRef = creativeRef;
+	            _this2.creativePath = payload[creativeRef].creativePath;
+	            _this2._switchAdType();
+	          }
+	
+	          // Update the data state.
+	          _this2.data = payload[_this2.creativeRef].instances[0].data;
+	          // Update the env data.
+	          _this2.env = payload[_this2.creativeRef].instances[0].env;
+	          // Update the CSS file path.
+	          _this2.CSSPath = payload[_this2.creativeRef].CSSPath;
+	          // Force the append point in the data to match the one that the class
+	          // is using.
+	          _this2.data.appendPoint = _this2.config.appendPoint;
+	          // Update the class selector based on the brand being used
+	          _this2.selector = _this2.config.appendPoint + ' .f8' + _this2.creativeRef;
+	          // Finally call the creative factory to create the ad
+	          return _this2._callCreativeFactory();
+	        });
+	      });
+	    }
+	
+	    /**
+	     * Removes the ad from the DOM and cleans up any brand scripts added.
+	     * @return {Promise} Resolves when finished.
+	     */
+	
+	  }, {
+	    key: 'destroy',
+	    value: function destroy() {
+	      // Only distroy the ad if it's currently active
+	      if (this.active) {
+	        var appEl = document.querySelector(this.selector);
+	        // Remove the ad and the brand CSS
+	        this.adInstance.destroy();
+	        appEl.parentNode.removeChild(appEl);
+	        this.active = false;
+	      }
+	    }
+	
+	    /**
+	     * Swtich ad type changes get the ad factory for the new creative if it exists
+	     * in the cache, otherwise it will inject a new script for it and wait for it
+	     * load.
+	     */
+	
+	  }, {
+	    key: '_switchAdType',
+	    value: function _switchAdType() {
+	      if (this.creativeFactoryCache.exists(this.creativeRef)) {
+	        this._setCreativeFactory(this.creativeFactoryCache.get(this.creativeRef));
+	      } else {
+	        this.awaitingFactory = true;
+	        (0, _util.injectScriptFactory)(this.creativePath);
+	      }
+	    }
+	
+	    /**
+	     * Takes a creative factory and sets it as the current one in the class and
+	     * also sets the state to not be waiting for a creative factory.
+	     * @param {Function} creativeFactory is the creative factory you want to set.
+	     */
+	
+	  }, {
+	    key: '_setCreativeFactory',
+	    value: function _setCreativeFactory(creativeFactory) {
+	      this.awaitingFactory = false;
+	      this.creativeFactory = creativeFactory;
+	    }
+	
+	    /**
+	     * Calls the currently set creative factory if it's not waiting for one.
+	     * @return {Promise} Resolves after the creative has been loaded on to the
+	     * page.
+	     */
+	
+	  }, {
+	    key: '_callCreativeFactory',
+	    value: function _callCreativeFactory() {
+	      var _this3 = this;
+	
+	      if (!this.awaitingFactory) {
+	        return this.creativeFactory(this.env, this.data, this.CSSPath, this.window).then(function (adInstance) {
+	          _this3.adInstance = adInstance;
+	          _this3.active = true;
+	          _this3.loadResolvers.resolve(_this3);
+	        }).catch(this.loadResolvers.reject);
+	      }
+	
+	      return Promise.resolve();
+	    }
+	  }]);
+	
+	  return Ad;
+	}();
+	
 	/**
-	 * Adds customEvent method to the window if it doesn't already exist.
+	 * Vaildates the config for the ad class.
+	 * @param  {Object} config is the configurations you want to vaildate.
+	 * @return {Object}        the vaildated config.
 	 */
-	function customEvent() {
-	  if (typeof window.CustomEvent === 'function') {
-	    return false;
+	
+	
+	exports.default = Ad;
+	function vaildateConfig() {
+	  var config = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+	
+	  if (typeof config.endpoint === 'undefined' || config.endpoint === '') {
+	    throw (0, _errors.invaildeConfig)('Missing "endpoint"');
 	  }
 	
-	  function CustomEvent(event, params) {
-	    params = params || { bubbles: false, cancelable: false, detail: undefined };
-	    var evt = document.createEvent('CustomEvent');
-	    evt.initCustomEvent(event, params.bubbles, params.cancelable, params.detail);
-	    return evt;
+	  if (typeof config.creativeFactoryCache === 'undefined' || config.creativeFactoryCache === '') {
+	    throw (0, _errors.invaildeConfig)('Missing "creativeFactoryCache"');
 	  }
 	
-	  CustomEvent.prototype = window.Event.prototype;
+	  if (typeof config.slotID === 'undefined' || config.slotID === '') {
+	    throw (0, _errors.invaildeConfig)('Missing "slotID"');
+	  }
 	
-	  window.CustomEvent = CustomEvent;
+	  if (typeof config.appendPoint === 'undefined' || config.appendPoint === '') {
+	    throw (0, _errors.invaildeConfig)('Missing "appendPoint"');
+	  }
+	
+	  if (typeof config.window === 'undefined' || config.window === '') {
+	    throw (0, _errors.invaildeConfig)('Missing "window"');
+	  }
+	
+	  if (typeof config.inApp === 'undefined') {
+	    config.inApp = false;
+	  }
+	
+	  if (typeof config.shouldBreakOut === 'undefined') {
+	    config.shouldBreakOut = false;
+	  }
+	
+	  if (typeof config.competitorIDs === 'undefined') {
+	    config.competitorIDs = [];
+	  }
+	
+	  if (typeof config.competitors === 'undefined') {
+	    config.competitors = [];
+	  }
+	
+	  if (typeof config.competitionIDs === 'undefined') {
+	    config.competitionIDs = [];
+	  }
+	
+	  if (typeof config.competitions === 'undefined') {
+	    config.competitions = [];
+	  }
+	
+	  if (typeof config.listenOnPushState === 'undefined') {
+	    config.listenOnPushState = false;
+	  }
+	
+	  if ((config.competitors.length !== 0 || config.competitions.length !== 0) && !config.sport) {
+	    throw (0, _errors.invaildeConfig)('Sport is required if "competitions" or "competitors" is passed through in the config');
+	  }
+	
+	  return config;
 	}
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
 
 /***/ },
 /* 7 */
@@ -2183,17 +2491,221 @@ return /******/ (function(modules) { // webpackBootstrap
 	Object.defineProperty(exports, "__esModule", {
 	  value: true
 	});
-	exports.getWindow = getWindow;
-	exports.getRef = getRef;
-	exports.buildQueryString = buildQueryString;
+	
+	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+	
+	exports.requestAdData = requestAdData;
 	exports.checkStatusCode = checkStatusCode;
 	exports.parseJSON = parseJSON;
+	exports.constructRequestURL = constructRequestURL;
+	exports.vaildateRequestAdConf = vaildateRequestAdConf;
+	exports.buildQueryString = buildQueryString;
+	
+	var _util = __webpack_require__(8);
+	
+	var _errors = __webpack_require__(9);
+	
+	/**
+	 * Makes a request to the ad server API building the URL from the config params
+	 * passed in.
+	 * @param  {Object} config is the configurations used to make the API reqeuest
+	 *                         E.G.
+	 *                         { slotID: 'f8-001'
+	 *                         , view: 'home-page' - optional
+	 *                         , clickTrackingRedirect: 'http://dfp.com?r=' - optional
+	 *                         , sport: 'football' - optional
+	 *                         , match: - optional
+	 *                         , competitorIDs: ['55436'] - optional Opta ID's
+	 *                         , competitors: ['Manchester United', 'Southampton'] - optinal
+	 *                         , competitionIDs: ['1245'] - optional Opta ID's
+	 *                         , competitions: ['Premier League'] - optional
+	 *                         , window: the window used to extra the page ref from
+	 *                         , inApp: false - optional
+	 *                         , endpoint: '' - optional
+	 *                         , url: 'http://fresh8gaming.com' - optional
+	 *                         }
+	 * @return {Promise}
+	 */
+	function requestAdData(config) {
+	  var vaildatedConfig = vaildateRequestAdConf(config);
+	
+	  // Build the end point URL with the slot ID
+	  var endpoint = constructRequestURL(vaildatedConfig.endpoint, {
+	    slot: vaildatedConfig.slotID,
+	    view: vaildatedConfig.view,
+	    clickUrl: vaildatedConfig.clickTrackingRedirect,
+	    sport: vaildatedConfig.sport,
+	    match: vaildatedConfig.match,
+	    competitorIds: vaildatedConfig.competitorIDs,
+	    competitors: vaildatedConfig.competitors,
+	    competitionIds: vaildatedConfig.competitionIDs,
+	    competitions: vaildatedConfig.competitions,
+	    ref: (0, _util.getRef)(vaildatedConfig.window, vaildatedConfig.inApp, vaildatedConfig.url)
+	  });
+	
+	  return fetch(endpoint).then(checkStatusCode).then(parseJSON);
+	}
+	
+	/**
+	 * Checks the stats code on a response and rejects the promise chain if
+	 * less than 200 or greater than 300.
+	 * @param  {Object} response is the fetch response object
+	 * @return {(Promise.reject|Object)} a rejected promise or the reponse object
+	 */
+	function checkStatusCode(response) {
+	  if (response.status >= 200 && response.status < 300) {
+	    return response;
+	  }
+	
+	  return Promise.reject('Server returned error: ' + response.status);
+	}
+	
+	/**
+	 * Returns the json from a fetch request
+	 * @param  {Object} response is the fetch response object
+	 * @return {Object} the parsed JSON object
+	 */
+	function parseJSON(response) {
+	  if (response) {
+	    return response.json();
+	  }
+	}
+	
+	/**
+	 * Builds the request URL from the config with the option to add extra
+	 * key/value.
+	 * @param  {Object} options is used for adding extra key values to the URL
+	 *                          as a query strings.
+	 * @return {String}         The constructed URL
+	 */
+	function constructRequestURL(url) {
+	  var options = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+	
+	  var queryStringsOptions = _extends({}, options);
+	
+	  if (typeof queryStringsOptions.competitorIds !== 'undefined') {
+	    queryStringsOptions.competitorIds = queryStringsOptions.competitorIds.map(function (value) {
+	      return encodeURIComponent(value);
+	    });
+	  }
+	
+	  if (typeof queryStringsOptions.competitors !== 'undefined') {
+	    queryStringsOptions.competitors = queryStringsOptions.competitors.map(function (value) {
+	      return encodeURIComponent(value);
+	    });
+	  }
+	
+	  if (typeof queryStringsOptions.competitionIds !== 'undefined') {
+	    queryStringsOptions.competitionIds = queryStringsOptions.competitionIds.map(function (value) {
+	      return encodeURIComponent(value);
+	    });
+	  }
+	
+	  if (typeof queryStringsOptions.competitions !== 'undefined') {
+	    queryStringsOptions.competitions = queryStringsOptions.competitions.map(function (value) {
+	      return encodeURIComponent(value);
+	    });
+	  }
+	
+	  var queryString = buildQueryString(queryStringsOptions);
+	
+	  return url + queryString;
+	}
+	
+	/**
+	 * Takes a requestAd conf object and vaildates it
+	 * @param  {Object} config is the user defined config object
+	 * @return {Object}        the vaildated object
+	 */
+	function vaildateRequestAdConf() {
+	  var config = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+	
+	  if (typeof config.endpoint === 'undefined' || config.endpoint === '') {
+	    throw (0, _errors.invaildeConfig)('Missing "endpoint"');
+	  }
+	
+	  if (typeof config.slotID === 'undefined' || config.slotID === '') {
+	    throw (0, _errors.invaildeConfig)('Missing "slotID"');
+	  }
+	
+	  if (typeof config.window === 'undefined' || config.window === '') {
+	    throw (0, _errors.invaildeConfig)('Missing "window"');
+	  }
+	
+	  if (typeof config.inApp === 'undefined') {
+	    config.inApp = false;
+	  }
+	
+	  if (typeof config.shouldBreakOut === 'undefined') {
+	    config.shouldBreakOut = false;
+	  }
+	
+	  if (typeof config.competitorIDs === 'undefined') {
+	    config.competitorIDs = [];
+	  }
+	
+	  if (typeof config.competitors === 'undefined') {
+	    config.competitors = [];
+	  }
+	
+	  if (typeof config.competitionIDs === 'undefined') {
+	    config.competitionIDs = [];
+	  }
+	
+	  if (typeof config.competitions === 'undefined') {
+	    config.competitions = [];
+	  }
+	
+	  if (typeof config.listenOnPushState === 'undefined') {
+	    config.listenOnPushState = false;
+	  }
+	
+	  if ((config.competitors.length !== 0 || config.competitions.length !== 0) && !config.sport) {
+	    throw (0, _errors.invaildeConfig)('Sport is required if "competitions" or "competitors" is passed through in the config');
+	  }
+	
+	  return config;
+	}
+	
+	/**
+	 * Takes a dictionary and converts it to a queryString
+	 * @param  {Object} dictionary is a dictionary of string key's to
+	 *                             string values.
+	 * @return {String} a queryString in the form of `?key=val&keyTwo=valTwo`.
+	 */
+	function buildQueryString(options) {
+	  var queryString = '?';
+	  Object.keys(options).forEach(function (option) {
+	    var value = options[option];
+	    if (value && value !== '' && value.length !== 0) {
+	      if (Object.prototype.toString.call(value) === '[object Array]') {
+	        queryString += option + '=' + value.join(',') + '&';
+	      } else {
+	        queryString += option + '=' + value + '&';
+	      }
+	    }
+	  });
+	
+	  return queryString;
+	}
+	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
+
+/***/ },
+/* 8 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.getWindow = getWindow;
+	exports.getRef = getRef;
 	exports.bindf8ToWindow = bindf8ToWindow;
 	exports.injectScriptFactory = injectScriptFactory;
-	exports.vaildateRequestAdConf = vaildateRequestAdConf;
 	exports.vaildateConfig = vaildateConfig;
 	
-	var _errors = __webpack_require__(8);
+	var _errors = __webpack_require__(9);
 	
 	/**
 	 * Returns the window object that this script should inject into
@@ -2257,53 +2769,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 	
 	/**
-	 * Takes a dictionary and converts it to a queryString
-	 * @param  {Object} dictionary is a dictionary of string key's to
-	 *                             string values.
-	 * @return {String} a queryString in the form of `?key=val&keyTwo=valTwo`.
-	 */
-	function buildQueryString(options) {
-	  var queryString = '?';
-	  Object.keys(options).forEach(function (option) {
-	    var value = options[option];
-	    if (value && value !== '' && value.length !== 0) {
-	      if (Object.prototype.toString.call(value) === '[object Array]') {
-	        queryString += option + '=' + value.join(',') + '&';
-	      } else {
-	        queryString += option + '=' + value + '&';
-	      }
-	    }
-	  });
-	
-	  return queryString;
-	}
-	
-	/**
-	 * Checks the stats code on a response and rejects the promise chain if
-	 * less than 200 or greater than 300.
-	 * @param  {Object} response is the fetch response object
-	 * @return {(Promise.reject|Object)} a rejected promise or the reponse object
-	 */
-	function checkStatusCode(response) {
-	  if (response.status >= 200 && response.status < 300) {
-	    return response;
-	  }
-	
-	  return Promise.reject('Server returned error: ' + response.status);
-	}
-	
-	/**
-	 * Returns the json from a fetch request
-	 * @param  {Object} response is the fetch response object
-	 * @return {Object} the parsed JSON object
-	 */
-	function parseJSON(response) {
-	  if (response) {
-	    return response.json();
-	  }
-	}
-	
-	/**
 	 * Binds the "__f8" object and API to the window
 	 * @param {String} version      is the version to bind the API under
 	 * @param {Object} targetWindow is window to bind the "__f8" object to
@@ -2355,51 +2820,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	}
 	
 	/**
-	 * Takes a requestAd conf object and vaildates it
-	 * @param  {Object} config is the user defined config object
-	 * @return {Object}        the vaildated object
-	 */
-	function vaildateRequestAdConf() {
-	  var config = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-	
-	  if (typeof config.slotID === 'undefined' || config.slotID === '') {
-	    throw (0, _errors.invaildeConfig)('Missing "slotID"');
-	  }
-	
-	  if (typeof config.appendPoint === 'undefined' || config.appendPoint === '') {
-	    throw (0, _errors.invaildeConfig)('Missing "appendPoint"');
-	  }
-	
-	  if (typeof config.competitorIDs === 'undefined') {
-	    config.competitorIDs = [];
-	  }
-	
-	  if (typeof config.competitors === 'undefined') {
-	    config.competitors = [];
-	  }
-	
-	  if (typeof config.competitionIDs === 'undefined') {
-	    config.competitionIDs = [];
-	  }
-	
-	  if (typeof config.competitions === 'undefined') {
-	    config.competitions = [];
-	  }
-	
-	  if ((config.competitors.length !== 0 || config.competitions.length !== 0) && !config.sport) {
-	    throw (0, _errors.invaildeConfig)('Sport is required if "competitions" or "competitors" is passed through in the config');
-	  }
-	
-	  return config;
-	}
-	
-	/**
 	 * Takes a config object and vaildates it
 	 * @param  {Object} config is the user defined config object
 	 * @return {Object}        the vaildated object
 	 */
 	function vaildateConfig() {
-	  var config = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+	  var config = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 	
 	  if (typeof config.instID === 'undefined' || config.instID === '') {
 	    throw (0, _errors.invaildeConfig)('Missing "instID" in config');
@@ -2417,12 +2843,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	    config.shouldBreakOut = false;
 	  }
 	
+	  if (typeof config.listenOnPushState === 'undefined') {
+	    config.listenOnPushState = false;
+	  }
+	
 	  return config;
 	}
-	/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
 
 /***/ },
-/* 8 */
+/* 9 */
 /***/ function(module, exports) {
 
 	'use strict';
@@ -2440,6 +2869,161 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var error = new Error(message);
 	  error.name = 'invaildeConfig';
 	  return error;
+	}
+
+/***/ },
+/* 10 */
+/***/ function(module, exports) {
+
+	"use strict";
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	
+	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+	
+	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+	
+	var Cache = function () {
+	  /**
+	   * A basic cache store class
+	   */
+	  function Cache() {
+	    _classCallCheck(this, Cache);
+	
+	    this.cache = {};
+	  }
+	
+	  /**
+	   * Set a value against a key in the store.
+	   * @param  {String} key   is the name that you want to store the data under.
+	   * @param  {*}      value is the data to you want to store.
+	   */
+	
+	
+	  _createClass(Cache, [{
+	    key: "put",
+	    value: function put(key, value) {
+	      this.cache[key] = value;
+	    }
+	
+	    /**
+	     * Remove a key/value pair from the store.
+	     * @param {String} key is the name of the key you want to remove.
+	     */
+	
+	  }, {
+	    key: "remove",
+	    value: function remove(key) {
+	      if (this.cache[key]) {
+	        delete this.cache[key];
+	      }
+	    }
+	
+	    /**
+	     * Retrieve a value from the store using a key.
+	     * @param  {String} key is the key you want to use to select cache value in
+	     *                      the store.
+	     * @return {*}          A cached value from the store if it exists.
+	     */
+	
+	  }, {
+	    key: "get",
+	    value: function get(key) {
+	      return this.cache[key];
+	    }
+	
+	    /**
+	     * Checks if a value exists in the store.
+	     * @param  {String} key is the key you want to use to check a value exists for.
+	     * @return {Boolean}    whether the value exists or not.
+	     */
+	
+	  }, {
+	    key: "exists",
+	    value: function exists(key) {
+	      if (this.cache[key]) {
+	        return true;
+	      } else {
+	        return false;
+	      }
+	    }
+	  }]);
+	
+	  return Cache;
+	}();
+	
+	exports.default = Cache;
+
+/***/ },
+/* 11 */
+/***/ function(module, exports) {
+
+	'use strict';
+	
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	exports.customEvent = customEvent;
+	exports.PolyfillHistoryPushState = PolyfillHistoryPushState;
+	/**
+	 * Adds customEvent method to the window if it doesn't already exist.
+	 */
+	function customEvent() {
+	  if (typeof window.CustomEvent === 'function') {
+	    return false;
+	  }
+	
+	  function CustomEvent(event, params) {
+	    params = params || { bubbles: false, cancelable: false, detail: undefined };
+	    var evt = document.createEvent('CustomEvent');
+	    evt.initCustomEvent(event, params.bubbles, params.cancelable, params.detail);
+	    return evt;
+	  }
+	
+	  CustomEvent.prototype = window.Event.prototype;
+	
+	  window.CustomEvent = CustomEvent;
+	}
+	
+	/**
+	 * Monkey patches the pushState function to emit a custome event
+	 * "__f8-history-push-state" on call.
+	 * @return {Object} Factories to apply and revert the polyfill changes
+	 */
+	function PolyfillHistoryPushState() {
+	  var _historyPushState = window.history.pushState;
+	  var historyPushStateEvent = new CustomEvent('__f8-history-push-state');
+	
+	  /**
+	   * Restores the original "window.history.pushState" method
+	   */
+	  function restore() {
+	    window.history.pushState = _historyPushState;
+	  }
+	
+	  /**
+	   * Applies the event dispatcher to the "history.pushState" method
+	   */
+	  function fill() {
+	    history.pushState = addEventDispatch;
+	  }
+	
+	  /**
+	   * A polyfilled version of the history.pushState" method with the
+	   * "__f8-history-push-state" dispatched on call.
+	   */
+	  function addEventDispatch() {
+	    var historyPushState = _historyPushState.apply(this, arguments);
+	    window.dispatchEvent(historyPushStateEvent);
+	    return historyPushState;
+	  }
+	
+	  return {
+	    restore: restore,
+	    fill: fill
+	  };
 	}
 
 /***/ }

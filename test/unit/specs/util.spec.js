@@ -1,13 +1,10 @@
+import { removeScriptTag } from '../lib/remove-script-tag';
 import {
   getWindow,
   getRef,
-  buildQueryString,
-  checkStatusCode,
-  parseJSON,
-  bindf8ToWindow,
-  injectScriptFactory,
   vaildateConfig,
-  vaildateRequestAdConf
+  bindf8ToWindow,
+  injectScriptFactory
 } from 'src/util.js';
 
 describe('src/util.js', () => {
@@ -60,53 +57,6 @@ describe('src/util.js', () => {
     it('Should return the "userOverrideRef" URL encoded if defined', () => {
       const ref = getRef(window, false, 'http://fresh8gaming.com');
       expect(ref).to.equal('http%3A%2F%2Ffresh8gaming.com');
-    });
-  });
-
-  describe('buildQueryString', () => {
-    it('Should take a object and encode each the key values to "?key=val&keyTwo=valTwo"', () => {
-      const queryString = buildQueryString({ team: 'Preston', sport: 'football' });
-      expect(queryString).to.equal('?team=Preston&sport=football&');
-    });
-
-    it('Should join arrays with commas', () => {
-      const queryString = buildQueryString({ team: ['Preston', 'Bristol'] });
-      expect(queryString).to.equal('?team=Preston,Bristol&');
-    });
-
-    it('Should\'t join empty arrays with commas', () => {
-      const queryString = buildQueryString({ team: [] });
-      expect(queryString).to.equal('?');
-    });
-  });
-
-  describe('checkStatusCode', () => {
-    it('Should rejecte the promise if the status is not >= 200 and < 300', done => {
-      checkStatusCode({ status: 500 })
-        .catch(reason => {
-          expect(reason).to.equal('Server returned error: 500');
-          done();
-        });
-    });
-
-    it('Should return the response if status is >= 200 and < 300', () => {
-      expect(checkStatusCode({ status: 200 })).to.deep.equal({ status: 200 });
-    });
-  });
-
-  describe('parseJSON', () => {
-    it('Should call json fn if response is defined', () => {
-      const jsonSpy = sinon.spy();
-      const response = {
-        json: jsonSpy
-      };
-
-      parseJSON(response);
-      expect(jsonSpy.called).to.equal(true);
-    });
-
-    it('Should\'t call json fn if response isn\'t defined', () => {
-      expect(parseJSON).to.not.throw(Error);
     });
   });
 
@@ -173,59 +123,7 @@ describe('src/util.js', () => {
       }
 
       expect(srcs).to.deep.contain('http://localhost:9876/test.js');
-    });
-  });
-
-  describe('vaildateRequestAdConf', () => {
-    it('Should throw an erorr if no "slotID" is passed', () => {
-      expect(vaildateRequestAdConf).to.throw(Error, 'Missing "slotID"');
-    });
-
-    it('Should throw an erorr if no "appendPoint" is passed', () => {
-      expect(() => vaildateRequestAdConf({ slotID: '123' })).to.throw(Error, 'Missing "appendPoint"');
-    });
-
-    it('Should add default values', () => {
-      const conf = vaildateRequestAdConf({ slotID: '123', appendPoint: 'body' });
-      expect(conf.competitorIDs).to.deep.equal([]);
-      expect(conf.competitors).to.deep.equal([]);
-      expect(conf.competitionIDs).to.deep.equal([]);
-      expect(conf.competitions).to.deep.equal([]);
-    });
-
-    it('Should\'t overwrite config passed', () => {
-      const options = {
-        slotID: '123',
-        appendPoint: 'body',
-        sport: 'football',
-        competitorIDs: ['5412'],
-        competitors: ['Manchester United', 'Southampton'],
-        competitionIDs: ['1245'],
-        competitions: ['Premier League']
-      };
-
-      const conf = vaildateRequestAdConf(options);
-      expect(conf).to.deep.equal(options);
-    });
-
-    it('Should throw an error if competitors is passed and no sport', () => {
-      const options = {
-        slotID: '123',
-        appendPoint: 'body',
-        competitors: ['Manchester United', 'Southampton']
-      };
-
-      expect(() => vaildateRequestAdConf(options)).to.throw('Sport is required if "competitions" or "competitors" is passed through in the config');
-    });
-
-    it('Should throw an error if competitions is passed and no sport', () => {
-      const options = {
-        slotID: '123',
-        appendPoint: 'body',
-        competitions: ['Premier League']
-      };
-
-      expect(() => vaildateRequestAdConf(options)).to.throw('Sport is required if "competitions" or "competitors" is passed through in the config');
+      removeScriptTag('http://localhost:9876/test.js');
     });
   });
 
