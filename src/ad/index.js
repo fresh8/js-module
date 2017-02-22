@@ -127,7 +127,7 @@ export default class Ad {
   }
 
   /**
-   * Reloads first destroys the current ad in place then requets new data
+   * Reloads first destroys the current ad in place then requests new data
    * from the ad serving API, if the creative ref exists in the factory cache
    * then it's loaded. If not a new script is injected into the page and once
    * loaded will be called by the ad.
@@ -193,7 +193,7 @@ export default class Ad {
   }
 
   /**
-   * Remove the ad from the DOM and cleans up any brand scripts added.
+   * Removes the ad from the DOM and cleans up any brand scripts added.
    * @return {Promise} Resolves when finished.
    */
   destroy () {

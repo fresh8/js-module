@@ -22,6 +22,7 @@ export default class Fresh8 {
    * @param {Object} config is the global instance configurations E.G.
    *                        { instID: '54ad56a213fe19232b646047'
    *                        , shouldBreakOut: false  - optinal
+   *                        , listenOnPushState: false - optinal
    *                        , inApp: false - optional
    *                        , endpoint: '' - optional
    *                        }
