@@ -4,7 +4,7 @@ import Cache from './cache';
 
 import {
   customEvent,
-  PollyfillHistoryPushState
+  PolyfillHistoryPushState
 } from './polyfill';
 
 import {
@@ -32,7 +32,7 @@ export default class Fresh8 {
   constructor (config) {
     // Ad class
     this.Ad = Ad;
-    // Pollyfills
+    // Adds polyfills for custome events.
     customEvent();
     // The vaildated user config.
     this.config = vaildateConfig(config);
@@ -49,8 +49,8 @@ export default class Fresh8 {
     this._addEventLisnters();
     // Bind a custome event for push state changes.
     if (this.config.listenOnPushState) {
-      this.pollyfillHistoryPushState = new PollyfillHistoryPushState();
-      this.pollyfillHistoryPushState.fill();
+      this.polyfillHistoryPushState = new PolyfillHistoryPushState();
+      this.polyfillHistoryPushState.fill();
     }
   }
 
@@ -100,7 +100,7 @@ export default class Fresh8 {
     this.destroyAllAds();
     // Restore the patch history push state
     if (this.config.listenOnPushState) {
-      this.pollyfillHistoryPushState.restore();
+      this.polyfillHistoryPushState.restore();
     }
   }
 

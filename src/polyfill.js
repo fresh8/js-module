@@ -21,9 +21,9 @@ export function customEvent () {
 /**
  * Monkey patches the pushState function to emit a custome event
  * "__f8-history-push-state" on call.
- * @return {Object} Factories to apply and revert the pollyfill changes
+ * @return {Object} Factories to apply and revert the polyfill changes
  */
-export function PollyfillHistoryPushState () {
+export function PolyfillHistoryPushState () {
   const _historyPushState = window.history.pushState;
   const historyPushStateEvent = new CustomEvent('__f8-history-push-state');
 
@@ -42,7 +42,7 @@ export function PollyfillHistoryPushState () {
   }
 
   /**
-   * A pollyfilled version of the history.pushState" method with the
+   * A polyfilled version of the history.pushState" method with the
    * "__f8-history-push-state" dispatched on call.
    */
   function addEventDispatch () {

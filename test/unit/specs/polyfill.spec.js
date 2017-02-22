@@ -1,12 +1,12 @@
-import { customEvent, PollyfillHistoryPushState } from 'src/polyfill.js';
+import { customEvent, PolyfillHistoryPushState } from 'src/polyfill.js';
 
 describe('src/index.js', () => {
-  describe('PollyfillHistoryPushState', () => {
+  describe('PolyfillHistoryPushState', () => {
     describe('restore', () => {
       it('Should remove the custom event on restore', () => {
-        const pollyfillHistoryPushState = PollyfillHistoryPushState();
-        pollyfillHistoryPushState.fill();
-        pollyfillHistoryPushState.restore();
+        const polyfillHistoryPushState = PolyfillHistoryPushState();
+        polyfillHistoryPushState.fill();
+        polyfillHistoryPushState.restore();
         const eventSpy = sinon.spy();
 
         window.addEventListener('__f8-history-push-state', eventSpy);
@@ -19,8 +19,8 @@ describe('src/index.js', () => {
 
     describe('fill', () => {
       it('Should add a custome event when the history pushState method is called', () => {
-        const pollyfillHistoryPushState = PollyfillHistoryPushState();
-        pollyfillHistoryPushState.fill();
+        const polyfillHistoryPushState = PolyfillHistoryPushState();
+        polyfillHistoryPushState.fill();
         const eventSpy = sinon.spy();
 
         window.addEventListener('__f8-history-push-state', eventSpy);

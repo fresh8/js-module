@@ -125,7 +125,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	    // Ad class
 	    this.Ad = _ad2.default;
-	    // Pollyfills
+	    // Adds polyfills for custome events.
 	    (0, _polyfill.customEvent)();
 	    // The vaildated user config.
 	    this.config = (0, _util.vaildateConfig)(config);
@@ -142,8 +142,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this._addEventLisnters();
 	    // Bind a custome event for push state changes.
 	    if (this.config.listenOnPushState) {
-	      this.pollyfillHistoryPushState = new _polyfill.PollyfillHistoryPushState();
-	      this.pollyfillHistoryPushState.fill();
+	      this.PolyfillHistoryPushState = new _polyfill.PolyfillHistoryPushState();
+	      this.polyfillHistoryPushState.fill();
 	    }
 	  }
 	
@@ -204,7 +204,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	      this.destroyAllAds();
 	      // Restore the patch history push state
 	      if (this.config.listenOnPushState) {
-	        this.pollyfillHistoryPushState.restore();
+	        this.polyfillHistoryPushState.restore();
 	      }
 	    }
 	
@@ -2983,7 +2983,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  value: true
 	});
 	exports.customEvent = customEvent;
-	exports.PollyfillHistoryPushState = PollyfillHistoryPushState;
+	exports.PolyfillHistoryPushState = PolyfillHistoryPushState;
 	/**
 	 * Adds customEvent method to the window if it doesn't already exist.
 	 */
@@ -3007,9 +3007,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	/**
 	 * Monkey patches the pushState function to emit a custome event
 	 * "__f8-history-push-state" on call.
-	 * @return {Object} Factories to apply and revert the pollyfill changes
+	 * @return {Object} Factories to apply and revert the polyfill changes
 	 */
-	function PollyfillHistoryPushState() {
+	function PolyfillHistoryPushState() {
 	  var _historyPushState = window.history.pushState;
 	  var historyPushStateEvent = new CustomEvent('__f8-history-push-state');
 	
@@ -3028,7 +3028,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	  }
 	
 	  /**
-	   * A pollyfilled version of the history.pushState" method with the
+	   * A polyfilled version of the history.pushState" method with the
 	   * "__f8-history-push-state" dispatched on call.
 	   */
 	  function addEventDispatch() {
