@@ -197,18 +197,14 @@ export default class Ad {
    * @return {Promise} Resolves when finished.
    */
   destroy () {
-    return new Promise((resolve, reject) => {
-      // Only distroy the ad if it's currently active
-      if (this.active) {
-        const appEl = document.querySelector(this.selector);
-        // Remove the ad and the brand CSS
-        this.adInstance.destroy();
-        appEl.parentNode.removeChild(appEl);
-        this.active = false;
-      }
-
-      resolve();
-    });
+    // Only distroy the ad if it's currently active
+    if (this.active) {
+      const appEl = document.querySelector(this.selector);
+      // Remove the ad and the brand CSS
+      this.adInstance.destroy();
+      appEl.parentNode.removeChild(appEl);
+      this.active = false;
+    }
   }
 
   /**

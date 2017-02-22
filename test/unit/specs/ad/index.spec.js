@@ -225,13 +225,11 @@ describe('src/ad/index.js', () => {
         ad.adInstance = { destroy: adInstanceSpy };
         ad.selector = '#test-el';
 
-        return ad
-          .destroy()
-          .then(() => {
-            expect(adInstanceSpy.called).to.equal(true);
-            expect(ad.active).to.equal(false);
-            expect(document.querySelector('#test-el')).to.equal(null);
-          });
+        ad.destroy();
+
+        expect(adInstanceSpy.called).to.equal(true);
+        expect(ad.active).to.equal(false);
+        expect(document.querySelector('#test-el')).to.equal(null);
       });
 
       it('Shouldn\'t distroy the ad instance if not active', () => {
@@ -248,11 +246,9 @@ describe('src/ad/index.js', () => {
         ad.adInstance = { destroy: adInstanceSpy };
         ad.active = false;
 
-        return ad
-          .destroy()
-          .then(() => {
-            expect(adInstanceSpy.called).to.equal(false);
-          });
+        ad.destroy();
+
+        expect(adInstanceSpy.called).to.equal(false);
       });
     });
 

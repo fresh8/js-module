@@ -49,6 +49,7 @@ describe('src/index.js', () => {
         return fresh8
           .requestAd({ slotID: '312', appendPoint: 'body' })
           .then(() => {
+            fresh8.ads[0].destroy = () => {};
             expect(loadSpy.called).to.equal(true);
             expect(fresh8.ads.length).to.equal(1);
             fresh8.remove();
