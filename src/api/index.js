@@ -12,7 +12,7 @@ import { invaildeConfig } from '../errors';
  *                         , sport: 'football' - optional
  *                         , match: - optional
  *                         , competitorIDs: ['55436'] - optional Opta ID's
- *                         , competitors: ['Manchester United', 'Sauthampton'] - optinal
+ *                         , competitors: ['Manchester United', 'Southampton'] - optinal
  *                         , competitionIDs: ['1245'] - optional Opta ID's
  *                         , competitions: ['Premier League'] - optional
  *                         , window: the window used to extra the page ref from

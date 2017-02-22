@@ -142,7 +142,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    this._addEventLisnters();
 	    // Bind a custome event for push state changes.
 	    if (this.config.listenOnPushState) {
-	      this.PolyfillHistoryPushState = new _polyfill.PolyfillHistoryPushState();
+	      this.polyfillHistoryPushState = new _polyfill.PolyfillHistoryPushState();
 	      this.polyfillHistoryPushState.fill();
 	    }
 	  }
@@ -159,7 +159,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   *                         , sport: 'football' - optional
 	   *                         , matchID: '85623' - optional Opta ID
 	   *                         , competitorIDs: ['55436'] - optional Opta ID's
-	   *                         , competitors: ['Manchester United', 'Sauthampton'] - optinal
+	   *                         , competitors: ['Manchester United', 'Southampton'] - optinal
 	   *                         , competitionIDs: ['1245'] - optional Opta ID's
 	   *                         , competitions: ['Premier League'] - optional
 	   *                         }
@@ -2159,24 +2159,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Ad = function () {
 	  /**
 	   * A class for managing and loading a single ad
-	   * @param  {Object} config is the configurations used to make the API reqeuest
-	   *                         { slotID: 'f8-001'
-	   *                         , creativeFactoryCache: new Cache() - used for
-	   *                           global cache factory look ups
-	    *                        , view: 'home-page' - optional
-	    *                        , clickTrackingRedirect: 'http://dfp.com?r=' - optional
-	    *                        , sport: 'football' - optional
-	    *                        , matchID: '85623' - optional Opta ID
-	    *                        , competitorIDs: ['55436'] - optional Opta ID's
-	    *                        , competitors: ['Manchester United', 'Sauthampton'] - optinal
-	    *                        , competitionIDs: ['1245'] - optional Opta ID's
-	    *                        , competitions: ['Premier League'] - optional
-	    *                        , window: the window used to extra the page ref from
-	    *                        , inApp: false - optional
-	    *                        , endpoint: '' - optional
-	    *                        , appendPoint: 'body' - required
-	    *                        , url: 'http://fresh8gaming.com' - optional
-	    *                        }
+	   * @param {Object} config is the configurations used to make the API reqeuest
+	   *                        { slotID: 'f8-001'
+	   *                        , creativeFactoryCache: new Cache() - used for
+	   *                          global cache factory look ups
+	   *                       , view: 'home-page' - optional
+	   *                       , clickTrackingRedirect: 'http://dfp.com?r=' - optional
+	   *                       , sport: 'football' - optional
+	   *                       , matchID: '85623' - optional Opta ID
+	   *                       , competitorIDs: ['55436'] - optional Opta ID's
+	   *                       , competitors: ['Manchester United', 'Southampton'] - optinal
+	   *                       , competitionIDs: ['1245'] - optional Opta ID's
+	   *                       , competitions: ['Premier League'] - optional
+	   *                       , window: the window used to extra the page ref from
+	   *                       , inApp: false - optional
+	   *                       , endpoint: '' - optional
+	   *                       , appendPoint: 'body' - required
+	   *                       , url: 'http://fresh8gaming.com' - optional
+	   *                       }
 	   */
 	  function Ad() {
 	    var config = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -2533,7 +2533,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *                         , sport: 'football' - optional
 	 *                         , match: - optional
 	 *                         , competitorIDs: ['55436'] - optional Opta ID's
-	 *                         , competitors: ['Manchester United', 'Sauthampton'] - optinal
+	 *                         , competitors: ['Manchester United', 'Southampton'] - optinal
 	 *                         , competitionIDs: ['1245'] - optional Opta ID's
 	 *                         , competitions: ['Premier League'] - optional
 	 *                         , window: the window used to extra the page ref from

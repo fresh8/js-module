@@ -66,7 +66,7 @@ export default class Fresh8 {
    *                         , sport: 'football' - optional
    *                         , matchID: '85623' - optional Opta ID
    *                         , competitorIDs: ['55436'] - optional Opta ID's
-   *                         , competitors: ['Manchester United', 'Sauthampton'] - optinal
+   *                         , competitors: ['Manchester United', 'Southampton'] - optinal
    *                         , competitionIDs: ['1245'] - optional Opta ID's
    *                         , competitions: ['Premier League'] - optional
    *                         }
