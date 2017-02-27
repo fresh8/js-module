@@ -22,7 +22,7 @@ describe('src/ad/index.js', () => {
     });
 
     describe('load', () => {
-      it('Should call the creative factory if set', done => {
+      it('Should call the creative factory if set', () => {
         const config = {
           endpoint: 'https://fresh8.co/123/raw',
           slotID: '123',
@@ -53,7 +53,7 @@ describe('src/ad/index.js', () => {
           ad.loadResolvers.resolve(ad);
         }, 500);
 
-        ad
+        return ad
           .load()
           .then(() => {
             expect(callCreativeFactoryStub.called).to.equal(true);
@@ -61,7 +61,27 @@ describe('src/ad/index.js', () => {
             fetchStub.restore();
             callCreativeFactoryStub.restore();
             removeScriptTag('http://localhost:9876/creative-factory.js');
-            done();
+          });
+      });
+
+      it('Should set the ad "active" to false if request fails', () => {
+        const config = {
+          endpoint: 'https://fresh8.co/123/raw',
+          slotID: '123',
+          appendPoint: 'body',
+          creativeFactoryCache: {},
+          window
+        };
+
+        const fetchStub = sinon.stub(window, 'fetch');
+        const ad = new Ad(config);
+        fetchStub.returns(Promise.reject(new Error('404')));
+
+        return ad
+          .load()
+          .catch(() => {
+            expect(ad.active).to.equal(false);
+            fetchStub.restore();
           });
       });
 

@@ -122,7 +122,10 @@ export default class Ad {
             }
           });
         })
-        .catch(reject);
+        .catch(reason => {
+          this.active = false;
+          reject(reason);
+        });
     });
   }
 
@@ -188,7 +191,8 @@ export default class Ad {
           this.selector = `${this.config.appendPoint} .f8${this.creativeRef}`;
           // Finally call the creative factory to create the ad
           return this._callCreativeFactory();
-        });
+        })
+        .catch(reject);
     });
   }
 

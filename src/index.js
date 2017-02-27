@@ -13,7 +13,7 @@ import {
   vaildateConfig
 } from './util';
 
-const version = '1.1.0';
+const version = '1.0.0';
 
 export default class Fresh8 {
   /**
@@ -164,11 +164,10 @@ export default class Fresh8 {
   }
 
   /**
-   * Handles the push state change evnet that reloads all the currently active
+   * Handels the push state change event that reloads all the currently active
    * ads on the page
-   * @param {Object} event is a custom event object
    */
-  _onHistoryPushStateChange (event) {
-    this.reloadAllAds();
+  _onHistoryPushStateChange () {
+    this.reloadAllAds().catch();
   }
 }

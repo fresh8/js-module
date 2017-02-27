@@ -44,7 +44,7 @@ describe('src/util.js', () => {
       document.body.appendChild(linkTag);
 
       const ref = getRef(window, false);
-      expect(ref).to.equal('http%3A%2F%2Flocalhost%3A9876%2Fcontext.html');
+      expect(ref).to.include('context.html');
 
       linkTag.parentNode.removeChild(linkTag);
     });

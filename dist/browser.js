@@ -104,7 +104,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 	
-	var version = '1.1.0';
+	var version = '1.0.0';
 	
 	var Fresh8 = function () {
 	  /**
@@ -291,15 +291,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	
 	    /**
-	     * Handles the push state change evnet that reloads all the currently active
+	     * Handels the push state change event that reloads all the currently active
 	     * ads on the page
-	     * @param {Object} event is a custom event object
 	     */
 	
 	  }, {
 	    key: '_onHistoryPushStateChange',
-	    value: function _onHistoryPushStateChange(event) {
-	      this.reloadAllAds();
+	    value: function _onHistoryPushStateChange() {
+	      this.reloadAllAds().catch();
 	    }
 	  }]);
 	
@@ -2284,7 +2283,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	              (0, _util.injectScriptFactory)(_this.creativePath);
 	            }
 	          });
-	        }).catch(reject);
+	        }).catch(function (reason) {
+	          _this.active = false;
+	          reject(reason);
+	        });
 	      });
 	    }
 	
@@ -2354,7 +2356,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          _this2.selector = _this2.config.appendPoint + ' .f8' + _this2.creativeRef;
 	          // Finally call the creative factory to create the ad
 	          return _this2._callCreativeFactory();
-	        });
+	        }).catch(reject);
 	      });
 	    }
 	
