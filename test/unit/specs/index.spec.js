@@ -11,7 +11,10 @@ describe('src/index.js', () => {
     it('Should bind to "__f8-history-push-state" when "listenOnPushState" is true', done => {
       const fresh8 = new Fresh8({ instID: '123', listenOnPushState: true });
       const onHistoryPushStateChangeSpy = sinon.spy();
-      fresh8.reloadAllAds = onHistoryPushStateChangeSpy;
+      fresh8.reloadAllAds = function () {
+        onHistoryPushStateChangeSpy();
+        return new Promise(resolve => resolve());
+      };
 
       function handlehistoryPushState () {
         expect(onHistoryPushStateChangeSpy.called).to.equal(true);
