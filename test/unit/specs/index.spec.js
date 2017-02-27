@@ -13,7 +13,7 @@ describe('src/index.js', () => {
       const onHistoryPushStateChangeSpy = sinon.spy();
       fresh8.reloadAllAds = function () {
         onHistoryPushStateChangeSpy();
-        return new Promise(resolve => resolve());
+        return Promise.resolve();
       };
 
       function handlehistoryPushState () {

@@ -274,14 +274,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }
 	
 	    /**
-	     * Handles the push state change evnet that reloads all the currently active
+	     * Handels the push state change event that reloads all the currently active
 	     * ads on the page
-	     * @param {Object} event is a custom event object
 	     */
 	
 	  }, {
 	    key: '_onHistoryPushStateChange',
-	    value: function _onHistoryPushStateChange(event) {
+	    value: function _onHistoryPushStateChange() {
 	      this.reloadAllAds().catch();
 	    }
 	  }]);
