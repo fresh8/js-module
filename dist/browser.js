@@ -2562,7 +2562,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    ref: (0, _util.getRef)(vaildatedConfig.window, vaildatedConfig.inApp, vaildatedConfig.url)
 	  });
 	
-	  return fetch(endpoint).then(checkStatusCode).then(parseJSON);
+	  return fetch(endpoint, { credentials: 'include' }).then(checkStatusCode).then(parseJSON);
 	}
 	
 	/**
