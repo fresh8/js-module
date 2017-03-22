@@ -41,7 +41,7 @@ export function requestAdData (config) {
       ref: getRef(vaildatedConfig.window, vaildatedConfig.inApp, vaildatedConfig.url)
     });
 
-  return fetch(endpoint)
+  return fetch(endpoint, { credentials: 'include' })
     .then(checkStatusCode)
     .then(parseJSON);
 }
