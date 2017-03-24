@@ -26,7 +26,7 @@ export default class Ad {
    */
   constructor (config = {}) {
     // Use to indercate if the ad has been distroyed.
-    this.active = true;
+    this.active = false;
     // awaitingFactory is used when slecting what ad classes require an creative
     // factory.
     this.awaitingFactory = true;
