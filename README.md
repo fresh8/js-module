@@ -1,6 +1,5 @@
 # Fresh8 JS Module
-[![CircleCI](https://circleci.com/gh/fresh8/js-module.svg?style=svg)](https://circleci.com/gh/fresh8/js-module)
-[![JavaScript Style Guide](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com/)
+[![JavaScript Style Guide](https://img.shields.io/badge/code%20style-standard-brightgreen.svg)](http://standardjs.com/) [![npm version](https://badge.fury.io/js/fresh8-js-module.svg)](https://badge.fury.io/js/fresh8-js-module) [![CircleCI](https://circleci.com/gh/fresh8/js-module.svg?style=svg)](https://circleci.com/gh/fresh8/js-module)
 
 Dynamically inject [Fresh8](http://fresh8gaming.com) ads into your website or app.
 
