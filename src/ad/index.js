@@ -108,7 +108,14 @@ export default class Ad {
             this.env = payload[creativeRef].instances[0].env;
             this.creativePath = payload[creativeRef].creativePath;
             this.data.appendPoint = this.config.appendPoint;
-            this.selector = `${this.config.appendPoint} .f8${this.creativeRef}`;
+
+            // If the ad is adhesion then it wont use the normal append point
+            // container selector.
+            if (this.env.adhesion) {
+              this.selector = '#f8-adhesion';
+            } else {
+              this.selector = `${this.config.appendPoint} .f8${this.creativeRef}`;
+            }
 
             // Pass the data directly to the ad if we already have it's factory
             // cached.
