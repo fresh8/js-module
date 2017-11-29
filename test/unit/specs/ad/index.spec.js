@@ -135,6 +135,42 @@ describe('src/ad/index.js', () => {
             done();
           });
       });
+
+      it('Should set the selector to #f8-adhesion if env.adhesion is true', () => {
+        const config = {
+          endpoint: 'https://fresh8.co/123/raw',
+          slotID: '123',
+          appendPoint: 'body',
+          creativeFactoryCache: {},
+          window
+        };
+
+        const fetchStub = sinon.stub(window, 'fetch');
+        const body = {
+          '54ad56a213fe19232b646047': {
+            creativePath: 'creative-factory.js',
+            CSSPath: 'test.css',
+            instances: [ { data: {}, env: { adhesion: true } } ]
+          }
+        };
+
+        fetchStub.returns(Promise.resolve(mockFetchResponse(body)));
+        const ad = new Ad(config);
+
+        // Simulate a network request injecting a creative factory
+        setTimeout(() => {
+          ad.loadResolvers.resolve(ad);
+        }, 500);
+
+        return ad
+          .load()
+          .then(() => {
+            expect(ad.selector).to.equal('#f8-adhesion');
+
+            fetchStub.restore();
+            removeScriptTag('http://localhost:9876/creative-factory.js');
+          });
+      });
     });
 
     describe('reload', () => {

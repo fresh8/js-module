@@ -2270,7 +2270,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	            _this.env = payload[creativeRef].instances[0].env;
 	            _this.creativePath = payload[creativeRef].creativePath;
 	            _this.data.appendPoint = _this.config.appendPoint;
-	            _this.selector = _this.config.appendPoint + ' .f8' + _this.creativeRef;
+	
+	            // If the ad is adhesion then it wont use the normal append point
+	            // container selector.
+	            if (_this.env.adhesion) {
+	              _this.selector = '#f8-adhesion';
+	            } else {
+	              _this.selector = _this.config.appendPoint + ' .f8' + _this.creativeRef;
+	            }
 	
 	            // Pass the data directly to the ad if we already have it's factory
 	            // cached.
