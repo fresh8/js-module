@@ -18,6 +18,7 @@ import { invaildeConfig } from '../errors';
  *                         , window: the window used to extra the page ref from
  *                         , inApp: false - optional
  *                         , endpoint: '' - optional
+ *                         , linkSameWindow: true - optional
  *                         , url: 'http://fresh8gaming.com' - optional
  *                         }
  * @return {Promise}
@@ -38,6 +39,7 @@ export function requestAdData (config) {
       competitors: vaildatedConfig.competitors,
       competitionIds: vaildatedConfig.competitionIDs,
       competitions: vaildatedConfig.competitions,
+      linkSameWindow: vaildatedConfig.linkSameWindow,
       ref: getRef(vaildatedConfig.window, vaildatedConfig.inApp, vaildatedConfig.url)
     });
 
@@ -126,6 +128,10 @@ export function vaildateRequestAdConf (config = {}) {
 
   if (typeof config.shouldBreakOut === 'undefined') {
     config.shouldBreakOut = false;
+  }
+
+  if (typeof config.linkSameWindow === 'undefined') {
+    config.linkSameWindow = false;
   }
 
   if (typeof config.competitorIDs === 'undefined') {
