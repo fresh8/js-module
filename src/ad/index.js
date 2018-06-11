@@ -88,7 +88,8 @@ export default class Ad {
         endpoint: this.config.endpoint,
         appendPoint: this.config.appendPoint,
         linkSameWindow: this.config.linkSameWindow,
-        url: this.config.url
+        url: this.config.url,
+        brand: this.config.brand
       };
 
       // Make the API request to the ad server
@@ -163,7 +164,8 @@ export default class Ad {
         endpoint: this.config.endpoint,
         appendPoint: this.config.appendPoint,
         linkSameWindow: this.config.linkSameWindow,
-        url: this.config.url
+        url: this.config.url,
+        brand: this.config.brand
       };
 
       // Request the ad data
