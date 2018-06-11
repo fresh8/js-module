@@ -93,7 +93,8 @@ describe('src/api/index.js', () => {
         listenOnPushState: true,
         linkSameWindow: true,
         inApp: true,
-        shouldBreakOut: true
+        shouldBreakOut: true,
+        brand: 'my-stylish-brand'
       };
 
       const conf = vaildateRequestAdConf(options);
@@ -136,11 +137,12 @@ describe('src/api/index.js', () => {
         competitorIds: ['1443', '5677'],
         competitors: ['preston'],
         competitionIds: ['125454'],
-        competitions: ['Premier League']
+        competitions: ['Premier League'],
+        brand: 'my-stylish-brand'
       };
 
       const URL = constructRequestURL('https://fresh8.co/123/raw', options);
-      expect(URL).to.equal('https://fresh8.co/123/raw?inApp=true&linkSameWindow=true&competitorIds=1443,5677&competitors=preston&competitionIds=125454&competitions=Premier%20League&');
+      expect(URL).to.equal('https://fresh8.co/123/raw?inApp=true&linkSameWindow=true&competitorIds=1443,5677&competitors=preston&competitionIds=125454&competitions=Premier%20League&brand=my-stylish-brand&');
     });
 
     it('Should skip empty arrays', () => {

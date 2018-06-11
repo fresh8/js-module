@@ -188,6 +188,14 @@ An optional flag to override link behaviour, making all links open in the same w
 | ---------------- | ------- | -------- | ------- |
 | `linkSameWindow` | Boolean | X        | `false` |
 
+#### `brand`
+
+An optional parameter to pass through the brand identify, sometimes required if you have more than one brand per publication or ad tag. Fresh8 will supply you with this value if needed.
+
+| Key     | Value  | Required | Default     |
+| ------- | ------ | -------- | ----------- |
+| `brand` | String | X        | `undefined` |
+
 ## Ad class
 
 An instantiated ad class is resolved from the `requestAd` method on success
