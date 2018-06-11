@@ -21,6 +21,8 @@ export default class Ad {
    *                       , inApp: false - optional
    *                       , endpoint: '' - optional
    *                       , appendPoint: 'body' - required
+   *                       , linkSameWindow: true - optional
+   *                       , brand: 'my-brand-name' - optional
    *                       , url: 'http://fresh8gaming.com' - optional
    *                       }
    */
@@ -85,6 +87,7 @@ export default class Ad {
         inApp: this.config.inApp,
         endpoint: this.config.endpoint,
         appendPoint: this.config.appendPoint,
+        linkSameWindow: this.config.linkSameWindow,
         url: this.config.url
       };
 
@@ -159,6 +162,7 @@ export default class Ad {
         inApp: this.config.inApp,
         endpoint: this.config.endpoint,
         appendPoint: this.config.appendPoint,
+        linkSameWindow: this.config.linkSameWindow,
         url: this.config.url
       };
 
@@ -294,6 +298,10 @@ export function vaildateConfig (config = {}) {
 
   if (typeof config.shouldBreakOut === 'undefined') {
     config.shouldBreakOut = false;
+  }
+
+  if (typeof config.linkSameWindow === 'undefined') {
+    config.linkSameWindow = false;
   }
 
   if (typeof config.competitorIDs === 'undefined') {
