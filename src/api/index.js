@@ -19,6 +19,7 @@ import { invaildeConfig } from '../errors';
  *                         , inApp: false - optional
  *                         , endpoint: '' - optional
  *                         , linkSameWindow: true - optional
+ *                         , brand: 'my-brand-name' - optional
  *                         , url: 'http://fresh8gaming.com' - optional
  *                         }
  * @return {Promise}
@@ -40,6 +41,7 @@ export function requestAdData (config) {
       competitionIds: vaildatedConfig.competitionIDs,
       competitions: vaildatedConfig.competitions,
       linkSameWindow: vaildatedConfig.linkSameWindow,
+      brand: vaildatedConfig.brand,
       ref: getRef(vaildatedConfig.window, vaildatedConfig.inApp, vaildatedConfig.url)
     });
 

@@ -22,6 +22,7 @@ export default class Ad {
    *                       , endpoint: '' - optional
    *                       , appendPoint: 'body' - required
    *                       , linkSameWindow: true - optional
+   *                       , brand: 'my-brand-name' - optional
    *                       , url: 'http://fresh8gaming.com' - optional
    *                       }
    */
