@@ -145,6 +145,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	   *                         , competitors: ['Manchester United', 'Southampton'] - optinal
 	   *                         , competitionIDs: ['1245'] - optional Opta ID's
 	   *                         , competitions: ['Premier League'] - optional
+	   *                         , brand: 'my-brand-name' - optional
 	   *                         }
 	   *                         For more details on these options please refer to
 	   *                         the readme.
@@ -2157,6 +2158,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	   *                       , inApp: false - optional
 	   *                       , endpoint: '' - optional
 	   *                       , appendPoint: 'body' - required
+	   *                       , linkSameWindow: true - optional
+	   *                       , brand: 'my-brand-name' - optional
 	   *                       , url: 'http://fresh8gaming.com' - optional
 	   *                       }
 	   */
@@ -2231,6 +2234,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          inApp: _this.config.inApp,
 	          endpoint: _this.config.endpoint,
 	          appendPoint: _this.config.appendPoint,
+	          linkSameWindow: _this.config.linkSameWindow,
 	          url: _this.config.url
 	        };
 	
@@ -2308,6 +2312,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	          inApp: _this2.config.inApp,
 	          endpoint: _this2.config.endpoint,
 	          appendPoint: _this2.config.appendPoint,
+	          linkSameWindow: _this2.config.linkSameWindow,
 	          url: _this2.config.url
 	        };
 	
@@ -2463,6 +2468,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	    config.shouldBreakOut = false;
 	  }
 	
+	  if (typeof config.linkSameWindow === 'undefined') {
+	    config.linkSameWindow = false;
+	  }
+	
 	  if (typeof config.competitorIDs === 'undefined') {
 	    config.competitorIDs = [];
 	  }
@@ -2531,6 +2540,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	 *                         , window: the window used to extra the page ref from
 	 *                         , inApp: false - optional
 	 *                         , endpoint: '' - optional
+	 *                         , linkSameWindow: true - optional
+	 *                         , brand: 'my-brand-name' - optional
 	 *                         , url: 'http://fresh8gaming.com' - optional
 	 *                         }
 	 * @return {Promise}
@@ -2549,6 +2560,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	    competitors: vaildatedConfig.competitors,
 	    competitionIds: vaildatedConfig.competitionIDs,
 	    competitions: vaildatedConfig.competitions,
+	    linkSameWindow: vaildatedConfig.linkSameWindow,
+	    brand: vaildatedConfig.brand,
 	    ref: (0, _util.getRef)(vaildatedConfig.window, vaildatedConfig.inApp, vaildatedConfig.url)
 	  });
 	
@@ -2647,6 +2660,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	  if (typeof config.shouldBreakOut === 'undefined') {
 	    config.shouldBreakOut = false;
+	  }
+	
+	  if (typeof config.linkSameWindow === 'undefined') {
+	    config.linkSameWindow = false;
 	  }
 	
 	  if (typeof config.competitorIDs === 'undefined') {
