@@ -2252,7 +2252,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	          endpoint: _this.config.endpoint,
 	          appendPoint: _this.config.appendPoint,
 	          linkSameWindow: _this.config.linkSameWindow,
-	          url: _this.config.url
+	          url: _this.config.url,
+	          brand: _this.config.brand
 	        };
 	
 	        // Make the API request to the ad server
@@ -2330,7 +2331,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	          endpoint: _this2.config.endpoint,
 	          appendPoint: _this2.config.appendPoint,
 	          linkSameWindow: _this2.config.linkSameWindow,
-	          url: _this2.config.url
+	          url: _this2.config.url,
+	          brand: _this2.config.brand
 	        };
 	
 	        // Request the ad data
