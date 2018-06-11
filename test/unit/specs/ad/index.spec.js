@@ -527,7 +527,8 @@ describe('src/ad/index.js', () => {
         competitors: ['Manchester United', 'Southampton'],
         competitionIDs: ['234435'],
         competitions: ['Premier League'],
-        sport: 'Football'
+        sport: 'Football',
+        linkSameWindow: true
       };
 
       const vaildatedConfig = vaildateConfig(config);
@@ -545,6 +546,7 @@ describe('src/ad/index.js', () => {
       expect(vaildatedConfig.competitionIDs).to.deep.equal(['234435']);
       expect(vaildatedConfig.competitions).to.deep.equal(['Premier League']);
       expect(vaildatedConfig.sport).to.equal('Football');
+      expect(vaildatedConfig.linkSameWindow).to.equal(true);
     });
 
     it('Should throw an error if competitors is passed and no sport', () => {

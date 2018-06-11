@@ -76,6 +76,8 @@ describe('src/api/index.js', () => {
       expect(conf.shouldBreakOut).to.deep.equal(false);
       expect(conf.inApp).to.deep.equal(false);
       expect(conf.listenOnPushState).to.deep.equal(false);
+      expect(conf.listenOnPushState).to.deep.equal(false);
+      expect(conf.linkSameWindow).to.deep.equal(false);
     });
 
     it('Should\'t overwrite config passed', () => {
@@ -89,8 +91,10 @@ describe('src/api/index.js', () => {
         competitionIDs: ['1245'],
         competitions: ['Premier League'],
         listenOnPushState: true,
+        linkSameWindow: true,
         inApp: true,
-        shouldBreakOut: true
+        shouldBreakOut: true,
+        brand: 'my-stylish-brand'
       };
 
       const conf = vaildateRequestAdConf(options);
@@ -129,14 +133,16 @@ describe('src/api/index.js', () => {
     it('Should return constructed URL when options passed', () => {
       const options = {
         inApp: true,
+        linkSameWindow: true,
         competitorIds: ['1443', '5677'],
         competitors: ['preston'],
         competitionIds: ['125454'],
-        competitions: ['Premier League']
+        competitions: ['Premier League'],
+        brand: 'my-stylish-brand'
       };
 
       const URL = constructRequestURL('https://fresh8.co/123/raw', options);
-      expect(URL).to.equal('https://fresh8.co/123/raw?inApp=true&competitorIds=1443,5677&competitors=preston&competitionIds=125454&competitions=Premier%20League&');
+      expect(URL).to.equal('https://fresh8.co/123/raw?inApp=true&linkSameWindow=true&competitorIds=1443,5677&competitors=preston&competitionIds=125454&competitions=Premier%20League&brand=my-stylish-brand&');
     });
 
     it('Should skip empty arrays', () => {
