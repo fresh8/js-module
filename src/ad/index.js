@@ -91,7 +91,6 @@ export default class Ad {
         url: this.config.url,
         brand: this.config.brand
       };
-
       // Make the API request to the ad server
       requestAdData(requestConfig)
         .then(payload => {
@@ -99,54 +98,71 @@ export default class Ad {
             resolve,
             reject
           };
-
           // Save the promise so it can be revoled after the creative script
           // has loaded.
           this.loadResolvers = resolvers;
-
+          // if env exists assume it
           // Inject the scripts for each ad.
-          Object.keys(payload).forEach(creativeRef => {
-            this.creativeRef = creativeRef;
-            this.CSSPath = payload[creativeRef].CSSPath;
-            this.data = payload[creativeRef].instances[0].data;
-            this.env = payload[creativeRef].instances[0].env;
-            this.creativePath = payload[creativeRef].creativePath;
-            this.data.appendPoint = this.config.appendPoint;
 
-            // If the ad is adhesion then it wont use the normal append point
-            // container selector.
-            if (this.env.adhesion) {
-              this.selector = '#f8-adhesion';
-            } else {
-              this.selector = `${this.config.appendPoint} .f8${this.creativeRef}`;
-            }
+          if (!payload.env) {
+            Object.keys(payload).forEach(creativeRef => {
+              console.log(creativeRef);
+              this.creativeRef = creativeRef;
+              this.CSSPath = payload[creativeRef].CSSPath;
+              this.data = payload[creativeRef].instances[0].data;
+              this.env = payload[creativeRef].instances[0].env;
+              this.creativePath = payload[creativeRef].creativePath;
+              this.data.appendPoint = this.config.appendPoint;
+            });
+          } else if (payload.env) {
+            console.log('evo');
+            Object.keys(payload.products).forEach(product => {
+              this.creativeRef = payload.products[product].config;
+              this.CSSPath = payload.products[product].skin;
+              this.data = payload.products[product].instances[0];
+              this.env = payload.env;
+              this.creativePath = `${payload.env.cdn}/${payload.products[product].config}.js`;
+              this.data.appendPoint = this.config.appendPoint;
+              console.log(this.data);
+            });
+          }
 
-            // Pass the data directly to the ad if we already have it's factory
-            // cached.
-            if (!this.awaitingFactory) {
-              this._callCreativeFactory();
+          // If the ad is adhesion then it wont use the normal append point
+          // container selector.
+          if (this.env.adhesion) {
+            this.selector = '#f8-adhesion';
+          } else {
+            this.selector = `${this.config.appendPoint} .f8${this.creativeRef}`;
+          }
+          // Pass the data directly to the ad if we already have it's factory
+          // cached.
+          if (!this.awaitingFactory) {
+            this._callCreativeFactory();
             // Else just script for the ad factory and pass the data too it once
             // the loaded event has been emited.
-            } else {
-              // Inject the ad factory script and wait for the load event
-              injectScriptFactory(this.creativePath);
-            }
-          });
-        })
-        .catch(reason => {
-          this.active = false;
-          reject(reason);
-        });
+          } else {
+            // Inject the ad factory script and wait for the load event
+            injectScriptFactory(this.creativePath);
+          }
+        }
+  )
+
+    .catch(reason => {
+      this.active = false;
+      reject(reason);
     });
+    }
+
+);
   }
 
-  /**
-   * Reloads first destroys the current ad in place then requests new data
-   * from the ad serving API, if the creative ref exists in the factory cache
-   * then it's loaded. If not a new script is injected into the page and once
-   * loaded will be called by the ad.
-   * @return {Promise} Resolve when the ad finishes loading
-   */
+/**
+ * Reloads first destroys the current ad in place then requests new data
+ * from the ad serving API, if the creative ref exists in the factory cache
+ * then it's loaded. If not a new script is injected into the page and once
+ * loaded will be called by the ad.
+ * @return {Promise} Resolve when the ad finishes loading
+ */
   reload () {
     return new Promise((resolve, reject) => {
       const requestConfig = {
@@ -168,67 +184,67 @@ export default class Ad {
         brand: this.config.brand
       };
 
-      // Request the ad data
+    // Request the ad data
       requestAdData(requestConfig)
-        .then(payload => {
-          // Grab the creative ref from the playload
-          const creativeRef = Object.keys(payload)[0];
-          const resolvers = {
-            resolve,
-            reject
-          };
+      .then(payload => {
+        // Grab the creative ref from the playload
+        const creativeRef = Object.keys(payload)[0];
+        const resolvers = {
+          resolve,
+          reject
+        };
 
-          // Save the promises incase they need to be resolved by the inject
-          // script.
-          this.loadResolvers = resolvers;
-          // Distroy the current ad in place.
-          this.destroy();
-          // If the creative type has changed then switch the ad type and update
-          // the currently set creative ref/creative path in the class.
-          if (creativeRef !== this.creativeRef) {
-            this.creativeRef = creativeRef;
-            this.creativePath = payload[creativeRef].creativePath;
-            this._switchAdType();
-          }
+        // Save the promises incase they need to be resolved by the inject
+        // script.
+        this.loadResolvers = resolvers;
+        // Distroy the current ad in place.
+        this.destroy();
+        // If the creative type has changed then switch the ad type and update
+        // the currently set creative ref/creative path in the class.
+        if (creativeRef !== this.creativeRef) {
+          this.creativeRef = creativeRef;
+          this.creativePath = payload[creativeRef].creativePath;
+          this._switchAdType();
+        }
 
-          // Update the data state.
-          this.data = payload[this.creativeRef].instances[0].data;
-          // Update the env data.
-          this.env = payload[this.creativeRef].instances[0].env;
-          // Update the CSS file path.
-          this.CSSPath = payload[this.creativeRef].CSSPath;
-          // Force the append point in the data to match the one that the class
-          // is using.
-          this.data.appendPoint = this.config.appendPoint;
-          // Update the class selector based on the brand being used
-          this.selector = `${this.config.appendPoint} .f8${this.creativeRef}`;
-          // Finally call the creative factory to create the ad
-          return this._callCreativeFactory();
-        })
-        .catch(reject);
+        // Update the data state.
+        this.data = payload[this.creativeRef].instances[0].data;
+        // Update the env data.
+        this.env = payload[this.creativeRef].instances[0].env;
+        // Update the CSS file path.
+        this.CSSPath = payload[this.creativeRef].CSSPath;
+        // Force the append point in the data to match the one that the class
+        // is using.
+        this.data.appendPoint = this.config.appendPoint;
+        // Update the class selector based on the brand being used
+        this.selector = `${this.config.appendPoint} .f8${this.creativeRef}`;
+        // Finally call the creative factory to create the ad
+        return this._callCreativeFactory();
+      })
+      .catch(reject);
     });
   }
 
-  /**
-   * Removes the ad from the DOM and cleans up any brand scripts added.
-   * @return {Promise} Resolves when finished.
-   */
+/**
+ * Removes the ad from the DOM and cleans up any brand scripts added.
+ * @return {Promise} Resolves when finished.
+ */
   destroy () {
-    // Only distroy the ad if it's currently active
+  // Only distroy the ad if it's currently active
     if (this.active) {
       const appEl = document.querySelector(this.selector);
-      // Remove the ad and the brand CSS
+    // Remove the ad and the brand CSS
       this.adInstance.destroy();
       appEl.parentNode.removeChild(appEl);
       this.active = false;
     }
   }
 
-  /**
-   * Swtich ad type changes get the ad factory for the new creative if it exists
-   * in the cache, otherwise it will inject a new script for it and wait for it
-   * load.
-   */
+/**
+ * Swtich ad type changes get the ad factory for the new creative if it exists
+ * in the cache, otherwise it will inject a new script for it and wait for it
+ * load.
+ */
   _switchAdType () {
     if (this.creativeFactoryCache.exists(this.creativeRef)) {
       this._setCreativeFactory(this.creativeFactoryCache.get(this.creativeRef));
@@ -238,30 +254,30 @@ export default class Ad {
     }
   }
 
-  /**
-   * Takes a creative factory and sets it as the current one in the class and
-   * also sets the state to not be waiting for a creative factory.
-   * @param {Function} creativeFactory is the creative factory you want to set.
-   */
+/**
+ * Takes a creative factory and sets it as the current one in the class and
+ * also sets the state to not be waiting for a creative factory.
+ * @param {Function} creativeFactory is the creative factory you want to set.
+ */
   _setCreativeFactory (creativeFactory) {
     this.awaitingFactory = false;
     this.creativeFactory = creativeFactory;
   }
 
-  /**
-   * Calls the currently set creative factory if it's not waiting for one.
-   * @return {Promise} Resolves after the creative has been loaded on to the
-   * page.
-   */
+/**
+ * Calls the currently set creative factory if it's not waiting for one.
+ * @return {Promise} Resolves after the creative has been loaded on to the
+ * page.
+ */
   _callCreativeFactory () {
     if (!this.awaitingFactory) {
       return this.creativeFactory(this.env, this.data, this.CSSPath, this.window)
-        .then(adInstance => {
-          this.adInstance = adInstance;
-          this.active = true;
-          this.loadResolvers.resolve(this);
-        })
-        .catch(this.loadResolvers.reject);
+      .then(adInstance => {
+        this.adInstance = adInstance;
+        this.active = true;
+        this.loadResolvers.resolve(this);
+      })
+      .catch(this.loadResolvers.reject);
     }
 
     return Promise.resolve();

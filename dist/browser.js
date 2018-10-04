@@ -2255,46 +2255,59 @@ return /******/ (function(modules) { // webpackBootstrap
 	          url: _this.config.url,
 	          brand: _this.config.brand
 	        };
-	
 	        // Make the API request to the ad server
 	        (0, _api.requestAdData)(requestConfig).then(function (payload) {
 	          var resolvers = {
 	            resolve: resolve,
 	            reject: reject
 	          };
-	
 	          // Save the promise so it can be revoled after the creative script
 	          // has loaded.
 	          _this.loadResolvers = resolvers;
-	
+	          // if env exists assume it
 	          // Inject the scripts for each ad.
-	          Object.keys(payload).forEach(function (creativeRef) {
-	            _this.creativeRef = creativeRef;
-	            _this.CSSPath = payload[creativeRef].CSSPath;
-	            _this.data = payload[creativeRef].instances[0].data;
-	            _this.env = payload[creativeRef].instances[0].env;
-	            _this.creativePath = payload[creativeRef].creativePath;
-	            _this.data.appendPoint = _this.config.appendPoint;
 	
-	            // If the ad is adhesion then it wont use the normal append point
-	            // container selector.
-	            if (_this.env.adhesion) {
-	              _this.selector = '#f8-adhesion';
-	            } else {
-	              _this.selector = _this.config.appendPoint + ' .f8' + _this.creativeRef;
-	            }
+	          if (!payload.env) {
+	            Object.keys(payload).forEach(function (creativeRef) {
+	              console.log(creativeRef);
+	              _this.creativeRef = creativeRef;
+	              _this.CSSPath = payload[creativeRef].CSSPath;
+	              _this.data = payload[creativeRef].instances[0].data;
+	              _this.env = payload[creativeRef].instances[0].env;
+	              _this.creativePath = payload[creativeRef].creativePath;
+	              _this.data.appendPoint = _this.config.appendPoint;
+	            });
+	          } else if (payload.env) {
+	            console.log('evo');
+	            Object.keys(payload.products).forEach(function (product) {
+	              _this.creativeRef = payload.products[product].config;
+	              _this.CSSPath = payload.products[product].skin;
+	              _this.data = payload.products[product].instances[0];
+	              _this.env = payload.env;
+	              _this.creativePath = payload.env.cdn + '/' + payload.products[product].config + '.js';
+	              _this.data.appendPoint = _this.config.appendPoint;
+	              console.log(_this.data);
+	            });
+	            console.log('test');
+	          }
 	
-	            // Pass the data directly to the ad if we already have it's factory
-	            // cached.
-	            if (!_this.awaitingFactory) {
-	              _this._callCreativeFactory();
-	              // Else just script for the ad factory and pass the data too it once
-	              // the loaded event has been emited.
-	            } else {
-	              // Inject the ad factory script and wait for the load event
-	              (0, _util.injectScriptFactory)(_this.creativePath);
-	            }
-	          });
+	          // If the ad is adhesion then it wont use the normal append point
+	          // container selector.
+	          if (_this.env.adhesion) {
+	            _this.selector = '#f8-adhesion';
+	          } else {
+	            _this.selector = _this.config.appendPoint + ' .f8' + _this.creativeRef;
+	          }
+	          // Pass the data directly to the ad if we already have it's factory
+	          // cached.
+	          if (!_this.awaitingFactory) {
+	            _this._callCreativeFactory();
+	            // Else just script for the ad factory and pass the data too it once
+	            // the loaded event has been emited.
+	          } else {
+	            // Inject the ad factory script and wait for the load event
+	            (0, _util.injectScriptFactory)(_this.creativePath);
+	          }
 	        }).catch(function (reason) {
 	          _this.active = false;
 	          reject(reason);
@@ -2567,7 +2580,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	 */
 	function requestAdData(config) {
 	  var vaildatedConfig = vaildateRequestAdConf(config);
-	
 	  // Build the end point URL with the slot ID
 	  var endpoint = constructRequestURL(vaildatedConfig.endpoint, {
 	    slot: vaildatedConfig.slotID,
