@@ -26,7 +26,6 @@ import { invaildeConfig } from '../errors';
  */
 export function requestAdData (config) {
   const vaildatedConfig = vaildateRequestAdConf(config);
-
   // Build the end point URL with the slot ID
   const endpoint = constructRequestURL(
     vaildatedConfig.endpoint,
