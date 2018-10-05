@@ -3,33 +3,34 @@
 // we are also using it with karma-webpack
 //   https://github.com/webpack/karma-webpack
 
-const path = require('path');
-const merge = require('webpack-merge');
-const baseConfig = require('../../build/webpack.conf');
-const projectRoot = path.resolve(__dirname, '../../');
-const webpackConfig = merge(baseConfig, { devtool: '#inline-source-map' });
+// const path = require('path');
+// const merge = require('webpack-merge');
+// const baseConfig = require('../../build/webpack.conf');
+// const projectRoot = path.resolve(__dirname, '../../');
+// const webpackConfig = merge(baseConfig, { devtool: '#inline-source-map' });
 
-// no need for app entry during tests
-delete webpackConfig.entry;
-// Update the target to be var
-webpackConfig.output.libraryTarget = 'var';
+// // no need for app entry during tests
+// delete webpackConfig.entry;
+// // Update the target to be var
+// webpackConfig.output.libraryTarget = 'var';
+//
+// // make sure isparta loader is applied before eslint
+// webpackConfig.module.preLoaders = webpackConfig.module.preLoaders || [];
+// webpackConfig.module.preLoaders.unshift({
+//   test: /\.js$/,
+//   loader: 'isparta',
+//   include: projectRoot,
+//   exclude: /test\/unit|node_modules/
+// });
+//
+// // only apply babel for test files when using isparta
+// webpackConfig.module.loaders.some(function (loader, i) {
+//   if (loader.loader === 'babel') {
+//     loader.include = /test\/unit/;
+//     return true;
+//   }
+// });
 
-// make sure isparta loader is applied before eslint
-webpackConfig.module.preLoaders = webpackConfig.module.preLoaders || [];
-webpackConfig.module.preLoaders.unshift({
-  test: /\.js$/,
-  loader: 'isparta',
-  include: projectRoot,
-  exclude: /test\/unit|node_modules/
-});
-
-// only apply babel for test files when using isparta
-webpackConfig.module.loaders.some(function (loader, i) {
-  if (loader.loader === 'babel') {
-    loader.include = /test\/unit/;
-    return true;
-  }
-});
 
 const reporters = [process.env.KARMA_REPORTER || 'spec', 'coverage'];
 
@@ -43,14 +44,28 @@ module.exports = function (config) {
       browsers: ['PhantomJS'],
       frameworks: ['mocha', 'sinon-chai'],
       reporters: reporters,
-      files: ['./index.js'],
-      preprocessors: { './index.js': ['webpack', 'sourcemap'] },
-      webpack: webpackConfig,
-      webpackMiddleware: { noInfo: true },
+      files: [
+        {
+          pattern: 'specs/**/*.spec.js'
+        }
+      ],
+      preprocessors: { 'specs/**/*.spec.js': ['rollup'] },
+      rollupPreprocessor: {
+        /**
+         * This is just a normal Rollup config object,
+         * except that `input` is handled for you.
+         */
+        plugins: [require('rollup-plugin-buble')(), require('rollup-plugin-commonjs')()],
+        output: {
+          format: 'iife',            // Helps prevent naming collisions.
+          name: 'jsmodule',    // Required for 'iife' format.
+          sourcemap: 'inline'        // Sensible for testing.
+        }
+      },
       client: { mocha: { timeout: '5000' } },
       specReporter: { },
       coverageReporter:
-      { dir: './coverage',
+      { dir: '../coverage',
         reporters: [
           { type: 'lcov', subdir: '.' },
           { type: 'text', subdir: '.', file: 'coverage.txt' },
