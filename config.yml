@@ -25,7 +25,7 @@ jobs:
     docker:
       - image: circleci/node:carbon
 
-    working_directory: ~/f8-ad-tool
+    working_directory: ~/js-module
     steps:
       - checkout
       - run:
