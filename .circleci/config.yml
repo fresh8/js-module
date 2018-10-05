@@ -41,7 +41,7 @@ jobs:
           paths:
             - ./node_modules/
       - run:
-          name: Building packages
+          name: Running Tests
           command: yarn build
 
 workflows:
