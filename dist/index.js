@@ -181,7 +181,6 @@ function vaildateConfig (config) {
  */
 function requestAdData (config) {
   var vaildatedConfig = vaildateRequestAdConf(config);
-
   // Build the end point URL with the slot ID
   var endpoint = constructRequestURL(
     vaildatedConfig.endpoint,
@@ -413,7 +412,6 @@ Ad.prototype.load = function load () {
       url: this$1.config.url,
       brand: this$1.config.brand
     };
-
     // Make the API request to the ad server
     requestAdData(requestConfig)
       .then(function (payload) {
@@ -421,45 +419,62 @@ Ad.prototype.load = function load () {
           resolve: resolve,
           reject: reject
         };
-
         // Save the promise so it can be revoled after the creative script
         // has loaded.
         this$1.loadResolvers = resolvers;
-
+        // if env exists assume it
         // Inject the scripts for each ad.
-        Object.keys(payload).forEach(function (creativeRef) {
-          this$1.creativeRef = creativeRef;
-          this$1.CSSPath = payload[creativeRef].CSSPath;
-          this$1.data = payload[creativeRef].instances[0].data;
-          this$1.env = payload[creativeRef].instances[0].env;
-          this$1.creativePath = payload[creativeRef].creativePath;
-          this$1.data.appendPoint = this$1.config.appendPoint;
 
-          // If the ad is adhesion then it wont use the normal append point
-          // container selector.
-          if (this$1.env.adhesion) {
-            this$1.selector = '#f8-adhesion';
-          } else {
-            this$1.selector = (this$1.config.appendPoint) + " .f8" + (this$1.creativeRef);
-          }
+        if (!payload.env) {
+          Object.keys(payload).forEach(function (creativeRef) {
+            console.log(creativeRef);
+            this$1.creativeRef = creativeRef;
+            this$1.CSSPath = payload[creativeRef].CSSPath;
+            this$1.data = payload[creativeRef].instances[0].data;
+            this$1.env = payload[creativeRef].instances[0].env;
+            this$1.creativePath = payload[creativeRef].creativePath;
+            this$1.data.appendPoint = this$1.config.appendPoint;
+          });
+        } else if (payload.env) {
+          console.log('evo');
+          Object.keys(payload.products).forEach(function (product) {
+            this$1.creativeRef = payload.products[product].config;
+            this$1.CSSPath = payload.products[product].skin;
+            this$1.data = payload.products[product].instances[0];
+            this$1.env = payload.env;
+            this$1.creativePath = (payload.env.cdn) + "/" + (payload.products[product].config) + ".js";
+            this$1.data.appendPoint = this$1.config.appendPoint;
+            console.log(this$1.data);
+          });
+        }
 
-          // Pass the data directly to the ad if we already have it's factory
-          // cached.
-          if (!this$1.awaitingFactory) {
-            this$1._callCreativeFactory();
+        // If the ad is adhesion then it wont use the normal append point
+        // container selector.
+        if (this$1.env.adhesion) {
+          this$1.selector = '#f8-adhesion';
+        } else {
+          this$1.selector = (this$1.config.appendPoint) + " .f8" + (this$1.creativeRef);
+        }
+        // Pass the data directly to the ad if we already have it's factory
+        // cached.
+        if (!this$1.awaitingFactory) {
+          this$1._callCreativeFactory();
           // Else just script for the ad factory and pass the data too it once
           // the loaded event has been emited.
-          } else {
-            // Inject the ad factory script and wait for the load event
-            injectScriptFactory(this$1.creativePath);
-          }
-        });
-      })
-      .catch(function (reason) {
-        this$1.active = false;
-        reject(reason);
-      });
+        } else {
+          // Inject the ad factory script and wait for the load event
+          injectScriptFactory(this$1.creativePath);
+        }
+      }
+)
+
+  .catch(function (reason) {
+    this$1.active = false;
+    reject(reason);
   });
+  }
+
+);
 };
 
 /**
@@ -492,44 +507,44 @@ Ad.prototype.reload = function reload () {
       brand: this$1.config.brand
     };
 
-    // Request the ad data
+  // Request the ad data
     requestAdData(requestConfig)
-      .then(function (payload) {
-        // Grab the creative ref from the playload
-        var creativeRef = Object.keys(payload)[0];
-        var resolvers = {
-          resolve: resolve,
-          reject: reject
-        };
+    .then(function (payload) {
+      // Grab the creative ref from the playload
+      var creativeRef = Object.keys(payload)[0];
+      var resolvers = {
+        resolve: resolve,
+        reject: reject
+      };
 
-        // Save the promises incase they need to be resolved by the inject
-        // script.
-        this$1.loadResolvers = resolvers;
-        // Distroy the current ad in place.
-        this$1.destroy();
-        // If the creative type has changed then switch the ad type and update
-        // the currently set creative ref/creative path in the class.
-        if (creativeRef !== this$1.creativeRef) {
-          this$1.creativeRef = creativeRef;
-          this$1.creativePath = payload[creativeRef].creativePath;
-          this$1._switchAdType();
-        }
+      // Save the promises incase they need to be resolved by the inject
+      // script.
+      this$1.loadResolvers = resolvers;
+      // Distroy the current ad in place.
+      this$1.destroy();
+      // If the creative type has changed then switch the ad type and update
+      // the currently set creative ref/creative path in the class.
+      if (creativeRef !== this$1.creativeRef) {
+        this$1.creativeRef = creativeRef;
+        this$1.creativePath = payload[creativeRef].creativePath;
+        this$1._switchAdType();
+      }
 
-        // Update the data state.
-        this$1.data = payload[this$1.creativeRef].instances[0].data;
-        // Update the env data.
-        this$1.env = payload[this$1.creativeRef].instances[0].env;
-        // Update the CSS file path.
-        this$1.CSSPath = payload[this$1.creativeRef].CSSPath;
-        // Force the append point in the data to match the one that the class
-        // is using.
-        this$1.data.appendPoint = this$1.config.appendPoint;
-        // Update the class selector based on the brand being used
-        this$1.selector = (this$1.config.appendPoint) + " .f8" + (this$1.creativeRef);
-        // Finally call the creative factory to create the ad
-        return this$1._callCreativeFactory();
-      })
-      .catch(reject);
+      // Update the data state.
+      this$1.data = payload[this$1.creativeRef].instances[0].data;
+      // Update the env data.
+      this$1.env = payload[this$1.creativeRef].instances[0].env;
+      // Update the CSS file path.
+      this$1.CSSPath = payload[this$1.creativeRef].CSSPath;
+      // Force the append point in the data to match the one that the class
+      // is using.
+      this$1.data.appendPoint = this$1.config.appendPoint;
+      // Update the class selector based on the brand being used
+      this$1.selector = (this$1.config.appendPoint) + " .f8" + (this$1.creativeRef);
+      // Finally call the creative factory to create the ad
+      return this$1._callCreativeFactory();
+    })
+    .catch(reject);
   });
 };
 
@@ -538,10 +553,10 @@ Ad.prototype.reload = function reload () {
  * @return {Promise} Resolves when finished.
  */
 Ad.prototype.destroy = function destroy () {
-  // Only distroy the ad if it's currently active
+// Only distroy the ad if it's currently active
   if (this.active) {
     var appEl = document.querySelector(this.selector);
-    // Remove the ad and the brand CSS
+  // Remove the ad and the brand CSS
     this.adInstance.destroy();
     appEl.parentNode.removeChild(appEl);
     this.active = false;
@@ -582,12 +597,12 @@ Ad.prototype._callCreativeFactory = function _callCreativeFactory () {
 
   if (!this.awaitingFactory) {
     return this.creativeFactory(this.env, this.data, this.CSSPath, this.window)
-      .then(function (adInstance) {
-        this$1.adInstance = adInstance;
-        this$1.active = true;
-        this$1.loadResolvers.resolve(this$1);
-      })
-      .catch(this.loadResolvers.reject);
+    .then(function (adInstance) {
+      this$1.adInstance = adInstance;
+      this$1.active = true;
+      this$1.loadResolvers.resolve(this$1);
+    })
+    .catch(this.loadResolvers.reject);
   }
 
   return Promise.resolve();
