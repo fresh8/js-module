@@ -48,7 +48,5 @@ workflows:
   version: 2
   test-build:
     jobs:
-      - build:
-          context: NPM
-      - test:
-          context: NPM
+      - build
+      - test
