@@ -1,4 +1,4 @@
-import { requestAdData } from '../api';
+import { requestAdData } from '../api/index';
 import { injectScriptFactory } from '../util';
 import { invaildeConfig } from '../errors';
 

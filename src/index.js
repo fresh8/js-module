@@ -1,6 +1,6 @@
 import 'whatwg-fetch';
-import Ad from './ad';
-import Cache from './cache';
+import Ad from './ad/index';
+import Cache from './cache/index';
 
 import {
   customEvent,

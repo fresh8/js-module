@@ -4,12 +4,16 @@
   "description": "Dynamically inject Fresh8 ads into your website or app.",
   "license": "MIT",
   "main": "dist/index.js",
+  "module": "dist/module.js",
+  "browser": "dist/browser.js",
   "scripts": {
     "test": "karma start test/unit/karma.conf.js --single-run",
-    "build": "node ./build/build",
-    "dev": "node ./build/watch & karma start test/unit/karma.conf.js",
+    "build": "rollup -c",
+    "dev": "rollup -c -w",
     "cov": "open ./test/unit/coverage/lcov-report/index.html",
-    "prepublish": "npm run build"
+    "lint": "eslint src/ test/unit/",
+    "preversion": "yarn test",
+    "postversion": "git push && git push --tags"
   },
   "bugs": {
     "url": "https://github.com/fresh8/js-module/issues"
@@ -53,6 +57,9 @@
     "karma-webpack": "^1.8.0",
     "lodash.clonedeep": "^4.5.0",
     "mocha": "^3.0.0",
+    "rollup": "^0.66.4",
+    "rollup-plugin-buble": "^0.19.2",
+    "rollup-plugin-commonjs": "^9.1.8",
     "should": "^10.0.0",
     "sinon": "^1.17.5",
     "sinon-chai": "^2.8.0",
@@ -62,6 +69,7 @@
   },
   "dependencies": {
     "es6-promise": "^3.3.1",
+    "karma-rollup-preprocessor": "^6.0.1",
     "whatwg-fetch": "^1.0.0"
   }
 }
