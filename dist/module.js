@@ -1,6 +1,4 @@
-'use strict';
-
-require('whatwg-fetch');
+import 'whatwg-fetch';
 
 /**
  * Invailde config
@@ -913,5 +911,5 @@ Fresh8.prototype._onHistoryPushStateChange = function _onHistoryPushStateChange 
   this.reloadAllAds().catch();
 };
 
-module.exports = Fresh8;
-//# sourceMappingURL=index.js.map
+export default Fresh8;
+//# sourceMappingURL=module.js.map
