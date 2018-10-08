@@ -1,6 +1,6 @@
 (function (global, factory) {
-  typeof exports === 'object' && typeof module !== 'undefined' ? factory(require('whatwg-fetch')) :
-  typeof define === 'function' && define.amd ? define(['whatwg-fetch'], factory) :
+  typeof exports === 'object' && typeof module !== 'undefined' ? factory() :
+  typeof define === 'function' && define.amd ? define(factory) :
   (factory());
 }(this, (function () { 'use strict';
 
@@ -21,7 +21,7 @@
    *                               to break from iframe.
    * @return {Window} the working window
    */
-  function getWindow (shouldBreak) {
+  function getWindow(shouldBreak) {
     var workingWindow = window;
     if (shouldBreak) {
       try {
@@ -49,26 +49,30 @@
    *                                   localtion is specified.
    * @return {String}  canonical string or page localtion URL encoded
    */
-  function getRef (window, inApp, userOverrideRef) {
-    if (userOverrideRef && typeof userOverrideRef !== 'undefined' && userOverrideRef !== '') {
+  function getRef(window, inApp, userOverrideRef) {
+    if (
+      userOverrideRef &&
+      typeof userOverrideRef !== "undefined" &&
+      userOverrideRef !== ""
+    ) {
       return encodeURIComponent(userOverrideRef);
     }
 
-    var links = window.document.getElementsByTagName('link');
+    var links = window.document.getElementsByTagName("link");
     var location = window.location.href;
 
     var canonical = null;
-    var ref = '';
+    var ref = "";
 
     for (var i = 0; i < links.length; i++) {
-      if (links[i].rel === 'canonical') {
+      if (links[i].rel === "canonical") {
         canonical = links[i].href;
         break;
       }
     }
 
     if (inApp) {
-      ref = 'about:blank';
+      ref = "about:blank";
     } else {
       ref = encodeURIComponent(canonical || location);
     }
@@ -81,7 +85,7 @@
    * @param {String} version      is the version to bind the API under
    * @param {Object} targetWindow is window to bind the "__f8" object to
    */
-  function bindf8ToWindow (version, targetWindow) {
+  function bindf8ToWindow(version, targetWindow) {
     if (!targetWindow.__f8) {
       targetWindow.__f8 = {};
     }
@@ -97,11 +101,11 @@
      * @param  {Function|Object} val - any value
      * @return {Object}              - assigned value for key
      */
-    targetWindow.__f8[version].setUndefinedProperty = function (key, val) {
+    targetWindow.__f8[version].setUndefinedProperty = function(key, val) {
       if (targetWindow.__f8[version][key]) {
         return targetWindow.__f8[version][key];
       } else if (val) {
-        if (typeof val === 'function') {
+        if (typeof val === "function") {
           targetWindow.__f8[version][key] = val();
           return targetWindow.__f8[version][key];
         } else {
@@ -109,7 +113,13 @@
           return val;
         }
       } else {
-        throw new Error('Trying to access f8 v' + version + ' property ' + key + ', but its not defined');
+        throw new Error(
+          "Trying to access f8 v" +
+            version +
+            " property " +
+            key +
+            ", but its not defined"
+        );
       }
     };
   }
@@ -119,11 +129,14 @@
    * @param  {String} creativeSource is the URL for the script you want to append
    *                                 to the page.
    */
-  function injectScriptFactory (creativeSource) {
-    var creativeTag = document.createElement('script');
-    creativeTag.type = 'text/javascript';
+  function injectScriptFactory(creativeSource) {
+    console.log("here here here");
+    console.log(creativeSource);
+    var creativeTag = document.createElement("script");
+    creativeTag.type = "text/javascript";
     creativeTag.src = creativeSource;
-    creativeTag.async = 'async';
+    creativeTag.async = "async";
+    console.log(creativeTag);
     document.body.appendChild(creativeTag);
   }
 
@@ -132,26 +145,26 @@
    * @param  {Object} config is the user defined config object
    * @return {Object}        the vaildated object
    */
-  function vaildateConfig (config) {
+  function vaildateConfig(config) {
     if ( config === void 0 ) config = {};
 
-    if (typeof config.instID === 'undefined' || config.instID === '') {
+    if (typeof config.instID === "undefined" || config.instID === "") {
       throw invaildeConfig('Missing "instID" in config');
     }
 
-    if (typeof config.endpoint === 'undefined' || config.endpoint === '') {
+    if (typeof config.endpoint === "undefined" || config.endpoint === "") {
       config.endpoint = "https://fresh8.co/" + (config.instID) + "/raw";
     }
 
-    if (typeof config.inApp === 'undefined') {
+    if (typeof config.inApp === "undefined") {
       config.inApp = false;
     }
 
-    if (typeof config.shouldBreakOut === 'undefined') {
+    if (typeof config.shouldBreakOut === "undefined") {
       config.shouldBreakOut = false;
     }
 
-    if (typeof config.listenOnPushState === 'undefined') {
+    if (typeof config.listenOnPushState === "undefined") {
       config.listenOnPushState = false;
     }
 
@@ -181,27 +194,31 @@
    *                         }
    * @return {Promise}
    */
-  function requestAdData (config) {
+  function requestAdData(config) {
     var vaildatedConfig = vaildateRequestAdConf(config);
     // Build the end point URL with the slot ID
-    var endpoint = constructRequestURL(
-      vaildatedConfig.endpoint,
-      {
-        slot: vaildatedConfig.slotID,
-        view: vaildatedConfig.view,
-        clickUrl: vaildatedConfig.clickTrackingRedirect,
-        sport: vaildatedConfig.sport,
-        match: vaildatedConfig.match,
-        competitorIds: vaildatedConfig.competitorIDs,
-        competitors: vaildatedConfig.competitors,
-        competitionIds: vaildatedConfig.competitionIDs,
-        competitions: vaildatedConfig.competitions,
-        linkSameWindow: vaildatedConfig.linkSameWindow,
-        brand: vaildatedConfig.brand,
-        ref: getRef(vaildatedConfig.window, vaildatedConfig.inApp, vaildatedConfig.url)
-      });
-
-    return fetch(endpoint, { credentials: 'include' })
+    console.log(vaildatedConfig);
+    var endpoint = constructRequestURL(vaildatedConfig.endpoint, {
+      slot: vaildatedConfig.slotID,
+      view: vaildatedConfig.view,
+      clickUrl: vaildatedConfig.clickTrackingRedirect,
+      sport: vaildatedConfig.sport,
+      match: vaildatedConfig.match,
+      competitorIds: vaildatedConfig.competitorIDs,
+      competitors: vaildatedConfig.competitors,
+      competitionIds: vaildatedConfig.competitionIDs,
+      competitions: vaildatedConfig.competitions,
+      linkSameWindow: vaildatedConfig.linkSameWindow,
+      brand: vaildatedConfig.brand,
+      ref: getRef(
+        vaildatedConfig.window,
+        vaildatedConfig.inApp,
+        vaildatedConfig.url
+      )
+    });
+    console.log(endpoint);
+    console.log("here 4444");
+    return fetch(endpoint, { credentials: "include" })
       .then(checkStatusCode)
       .then(parseJSON);
   }
@@ -212,12 +229,12 @@
    * @param  {Object} response is the fetch response object
    * @return {(Promise.reject|Object)} a rejected promise or the reponse object
    */
-  function checkStatusCode (response) {
+  function checkStatusCode(response) {
     if (response.status >= 200 && response.status < 300) {
       return response;
     }
 
-    return Promise.reject('Server returned error: ' + response.status);
+    return Promise.reject("Server returned error: " + response.status);
   }
 
   /**
@@ -225,7 +242,7 @@
    * @param  {Object} response is the fetch response object
    * @return {Object} the parsed JSON object
    */
-  function parseJSON (response) {
+  function parseJSON(response) {
     if (response) {
       return response.json();
     }
@@ -238,29 +255,37 @@
    *                          as a query strings.
    * @return {String}         The constructed URL
    */
-  function constructRequestURL (url, options) {
+  function constructRequestURL(url, options) {
     if ( options === void 0 ) options = {};
 
     var queryStringsOptions = Object.assign({}, options);
 
-    if (typeof queryStringsOptions.competitorIds !== 'undefined') {
-      queryStringsOptions.competitorIds = queryStringsOptions.competitorIds.map(function (value) { return encodeURIComponent(value); });
+    if (typeof queryStringsOptions.competitorIds !== "undefined") {
+      queryStringsOptions.competitorIds = queryStringsOptions.competitorIds.map(
+        function (value) { return encodeURIComponent(value); }
+      );
     }
 
-    if (typeof queryStringsOptions.competitors !== 'undefined') {
-      queryStringsOptions.competitors = queryStringsOptions.competitors.map(function (value) { return encodeURIComponent(value); });
+    if (typeof queryStringsOptions.competitors !== "undefined") {
+      queryStringsOptions.competitors = queryStringsOptions.competitors.map(
+        function (value) { return encodeURIComponent(value); }
+      );
     }
 
-    if (typeof queryStringsOptions.competitionIds !== 'undefined') {
-      queryStringsOptions.competitionIds = queryStringsOptions.competitionIds.map(function (value) { return encodeURIComponent(value); });
+    if (typeof queryStringsOptions.competitionIds !== "undefined") {
+      queryStringsOptions.competitionIds = queryStringsOptions.competitionIds.map(
+        function (value) { return encodeURIComponent(value); }
+      );
     }
 
-    if (typeof queryStringsOptions.competitions !== 'undefined') {
-      queryStringsOptions.competitions = queryStringsOptions.competitions.map(function (value) { return encodeURIComponent(value); });
+    if (typeof queryStringsOptions.competitions !== "undefined") {
+      queryStringsOptions.competitions = queryStringsOptions.competitions.map(
+        function (value) { return encodeURIComponent(value); }
+      );
     }
 
     var queryString = buildQueryString(queryStringsOptions);
-
+    console.log("gugugu:", url + queryString);
     return url + queryString;
   }
 
@@ -269,55 +294,60 @@
    * @param  {Object} config is the user defined config object
    * @return {Object}        the vaildated object
    */
-  function vaildateRequestAdConf (config) {
+  function vaildateRequestAdConf(config) {
     if ( config === void 0 ) config = {};
 
-    if (typeof config.endpoint === 'undefined' || config.endpoint === '') {
+    if (typeof config.endpoint === "undefined" || config.endpoint === "") {
       throw invaildeConfig('Missing "endpoint"');
     }
 
-    if (typeof config.slotID === 'undefined' || config.slotID === '') {
+    if (typeof config.slotID === "undefined" || config.slotID === "") {
       throw invaildeConfig('Missing "slotID"');
     }
 
-    if (typeof config.window === 'undefined' || config.window === '') {
+    if (typeof config.window === "undefined" || config.window === "") {
       throw invaildeConfig('Missing "window"');
     }
 
-    if (typeof config.inApp === 'undefined') {
+    if (typeof config.inApp === "undefined") {
       config.inApp = false;
     }
 
-    if (typeof config.shouldBreakOut === 'undefined') {
+    if (typeof config.shouldBreakOut === "undefined") {
       config.shouldBreakOut = false;
     }
 
-    if (typeof config.linkSameWindow === 'undefined') {
+    if (typeof config.linkSameWindow === "undefined") {
       config.linkSameWindow = false;
     }
 
-    if (typeof config.competitorIDs === 'undefined') {
+    if (typeof config.competitorIDs === "undefined") {
       config.competitorIDs = [];
     }
 
-    if (typeof config.competitors === 'undefined') {
+    if (typeof config.competitors === "undefined") {
       config.competitors = [];
     }
 
-    if (typeof config.competitionIDs === 'undefined') {
+    if (typeof config.competitionIDs === "undefined") {
       config.competitionIDs = [];
     }
 
-    if (typeof config.competitions === 'undefined') {
+    if (typeof config.competitions === "undefined") {
       config.competitions = [];
     }
 
-    if (typeof config.listenOnPushState === 'undefined') {
+    if (typeof config.listenOnPushState === "undefined") {
       config.listenOnPushState = false;
     }
 
-    if ((config.competitors.length !== 0 || config.competitions.length !== 0) && !config.sport) {
-      throw invaildeConfig('Sport is required if "competitions" or "competitors" is passed through in the config');
+    if (
+      (config.competitors.length !== 0 || config.competitions.length !== 0) &&
+      !config.sport
+    ) {
+      throw invaildeConfig(
+        'Sport is required if "competitions" or "competitors" is passed through in the config'
+      );
     }
 
     return config;
@@ -329,15 +359,16 @@
    *                             string values.
    * @return {String} a queryString in the form of `?key=val&keyTwo=valTwo`.
    */
-  function buildQueryString (options) {
-    var queryString = '?';
-    Object.keys(options).forEach(function (option) {
+  function buildQueryString(options) {
+    console.log("options", options);
+    var queryString = "?";
+    Object.keys(options).forEach(function(option) {
       var value = options[option];
-      if (value && value !== '' && value.length !== 0) {
-        if (Object.prototype.toString.call(value) === '[object Array]') {
-          queryString += option + '=' + value.join(',') + '&';
+      if (value && value !== "" && value.length !== 0) {
+        if (Object.prototype.toString.call(value) === "[object Array]") {
+          queryString += option + "=" + value.join(",") + "&";
         } else {
-          queryString += option + '=' + value + '&';
+          queryString += option + "=" + value + "&";
         }
       }
     });
@@ -345,7 +376,7 @@
     return queryString;
   }
 
-  var Ad = function Ad (config) {
+  var Ad = function Ad(config) {
     if ( config === void 0 ) config = {};
 
     // Use to indercate if the ad has been distroyed.
@@ -414,6 +445,7 @@
         url: this$1.config.url,
         brand: this$1.config.brand
       };
+      console.log(requestConfig);
       // Make the API request to the ad server
       requestAdData(requestConfig)
         .then(function (payload) {
@@ -438,45 +470,48 @@
               this$1.data.appendPoint = this$1.config.appendPoint;
             });
           } else if (payload.env) {
-            console.log('evo');
+            console.log("evo");
             Object.keys(payload.products).forEach(function (product) {
+              console.log("product", payload.products[product]);
               this$1.creativeRef = payload.products[product].config;
               this$1.CSSPath = payload.products[product].skin;
+              // this.CSSPath = `${payload.env.cdn}/${
+              // payload.products[product].skin
+              // }.json`;
               this$1.data = payload.products[product].instances[0];
               this$1.env = payload.env;
-              this$1.creativePath = (payload.env.cdn) + "/" + (payload.products[product].config) + ".js";
+              this$1.creativePath = (payload.env.cdn) + "/" + (payload.products[product].config) + ".js?v=" + (payload.env.version);
               this$1.data.appendPoint = this$1.config.appendPoint;
-              console.log(this$1.data);
             });
           }
 
           // If the ad is adhesion then it wont use the normal append point
           // container selector.
           if (this$1.env.adhesion) {
-            this$1.selector = '#f8-adhesion';
+            this$1.selector = "#f8-adhesion";
           } else {
             this$1.selector = (this$1.config.appendPoint) + " .f8" + (this$1.creativeRef);
           }
           // Pass the data directly to the ad if we already have it's factory
           // cached.
           if (!this$1.awaitingFactory) {
+            console.log("here646464");
             this$1._callCreativeFactory();
             // Else just script for the ad factory and pass the data too it once
             // the loaded event has been emited.
           } else {
             // Inject the ad factory script and wait for the load event
+            console.log(this$1.CSSPath);
             injectScriptFactory(this$1.creativePath);
+            console.log(this$1);
           }
-        }
-  )
+        })
 
-    .catch(function (reason) {
-      this$1.active = false;
-      reject(reason);
+        .catch(function (reason) {
+          this$1.active = false;
+          reject(reason);
+        });
     });
-    }
-
-  );
   };
 
   /**
@@ -490,6 +525,7 @@
       var this$1 = this;
 
     return new Promise(function (resolve, reject) {
+      console.log("reload");
       var requestConfig = {
         slotID: this$1.config.slotID,
         view: this$1.config.view,
@@ -509,44 +545,44 @@
         brand: this$1.config.brand
       };
 
-    // Request the ad data
+      // Request the ad data
       requestAdData(requestConfig)
-      .then(function (payload) {
-        // Grab the creative ref from the playload
-        var creativeRef = Object.keys(payload)[0];
-        var resolvers = {
-          resolve: resolve,
-          reject: reject
-        };
+        .then(function (payload) {
+          // Grab the creative ref from the playload
+          var creativeRef = Object.keys(payload)[0];
+          var resolvers = {
+            resolve: resolve,
+            reject: reject
+          };
 
-        // Save the promises incase they need to be resolved by the inject
-        // script.
-        this$1.loadResolvers = resolvers;
-        // Distroy the current ad in place.
-        this$1.destroy();
-        // If the creative type has changed then switch the ad type and update
-        // the currently set creative ref/creative path in the class.
-        if (creativeRef !== this$1.creativeRef) {
-          this$1.creativeRef = creativeRef;
-          this$1.creativePath = payload[creativeRef].creativePath;
-          this$1._switchAdType();
-        }
+          // Save the promises incase they need to be resolved by the inject
+          // script.
+          this$1.loadResolvers = resolvers;
+          // Distroy the current ad in place.
+          this$1.destroy();
+          // If the creative type has changed then switch the ad type and update
+          // the currently set creative ref/creative path in the class.
+          if (creativeRef !== this$1.creativeRef) {
+            this$1.creativeRef = creativeRef;
+            this$1.creativePath = payload[creativeRef].creativePath;
+            this$1._switchAdType();
+          }
 
-        // Update the data state.
-        this$1.data = payload[this$1.creativeRef].instances[0].data;
-        // Update the env data.
-        this$1.env = payload[this$1.creativeRef].instances[0].env;
-        // Update the CSS file path.
-        this$1.CSSPath = payload[this$1.creativeRef].CSSPath;
-        // Force the append point in the data to match the one that the class
-        // is using.
-        this$1.data.appendPoint = this$1.config.appendPoint;
-        // Update the class selector based on the brand being used
-        this$1.selector = (this$1.config.appendPoint) + " .f8" + (this$1.creativeRef);
-        // Finally call the creative factory to create the ad
-        return this$1._callCreativeFactory();
-      })
-      .catch(reject);
+          // Update the data state.
+          this$1.data = payload[this$1.creativeRef].instances[0].data;
+          // Update the env data.
+          this$1.env = payload[this$1.creativeRef].instances[0].env;
+          // Update the CSS file path.
+          this$1.CSSPath = payload[this$1.creativeRef].CSSPath;
+          // Force the append point in the data to match the one that the class
+          // is using.
+          this$1.data.appendPoint = this$1.config.appendPoint;
+          // Update the class selector based on the brand being used
+          this$1.selector = (this$1.config.appendPoint) + " .f8" + (this$1.creativeRef);
+          // Finally call the creative factory to create the ad
+          return this$1._callCreativeFactory();
+        })
+        .catch(reject);
     });
   };
 
@@ -555,10 +591,10 @@
    * @return {Promise} Resolves when finished.
    */
   Ad.prototype.destroy = function destroy () {
-  // Only distroy the ad if it's currently active
+    // Only distroy the ad if it's currently active
     if (this.active) {
       var appEl = document.querySelector(this.selector);
-    // Remove the ad and the brand CSS
+      // Remove the ad and the brand CSS
       this.adInstance.destroy();
       appEl.parentNode.removeChild(appEl);
       this.active = false;
@@ -585,6 +621,7 @@
    * @param {Function} creativeFactory is the creative factory you want to set.
    */
   Ad.prototype._setCreativeFactory = function _setCreativeFactory (creativeFactory) {
+    console.log("here ierwoiewhr");
     this.awaitingFactory = false;
     this.creativeFactory = creativeFactory;
   };
@@ -598,13 +635,18 @@
       var this$1 = this;
 
     if (!this.awaitingFactory) {
-      return this.creativeFactory(this.env, this.data, this.CSSPath, this.window)
-      .then(function (adInstance) {
-        this$1.adInstance = adInstance;
-        this$1.active = true;
-        this$1.loadResolvers.resolve(this$1);
-      })
-      .catch(this.loadResolvers.reject);
+      return this.creativeFactory(
+        this.env,
+        this.data,
+        this.CSSPath,
+        this.window
+      )
+        .then(function (adInstance) {
+          this$1.adInstance = adInstance;
+          this$1.active = true;
+          this$1.loadResolvers.resolve(this$1);
+        })
+        .catch(this.loadResolvers.reject);
     }
 
     return Promise.resolve();
@@ -615,63 +657,71 @@
    * @param  {Object} config is the configurations you want to vaildate.
    * @return {Object}        the vaildated config.
    */
-  function vaildateConfig$1 (config) {
+  function vaildateConfig$1(config) {
     if ( config === void 0 ) config = {};
 
-    if (typeof config.endpoint === 'undefined' || config.endpoint === '') {
+    if (typeof config.endpoint === "undefined" || config.endpoint === "") {
       throw invaildeConfig('Missing "endpoint"');
     }
 
-    if (typeof config.creativeFactoryCache === 'undefined' || config.creativeFactoryCache === '') {
+    if (
+      typeof config.creativeFactoryCache === "undefined" ||
+      config.creativeFactoryCache === ""
+    ) {
       throw invaildeConfig('Missing "creativeFactoryCache"');
     }
 
-    if (typeof config.slotID === 'undefined' || config.slotID === '') {
+    if (typeof config.slotID === "undefined" || config.slotID === "") {
       throw invaildeConfig('Missing "slotID"');
     }
 
-    if (typeof config.appendPoint === 'undefined' || config.appendPoint === '') {
+    if (typeof config.appendPoint === "undefined" || config.appendPoint === "") {
       throw invaildeConfig('Missing "appendPoint"');
     }
 
-    if (typeof config.window === 'undefined' || config.window === '') {
+    if (typeof config.window === "undefined" || config.window === "") {
       throw invaildeConfig('Missing "window"');
     }
 
-    if (typeof config.inApp === 'undefined') {
+    if (typeof config.inApp === "undefined") {
       config.inApp = false;
     }
 
-    if (typeof config.shouldBreakOut === 'undefined') {
+    if (typeof config.shouldBreakOut === "undefined") {
       config.shouldBreakOut = false;
     }
 
-    if (typeof config.linkSameWindow === 'undefined') {
+    if (typeof config.linkSameWindow === "undefined") {
       config.linkSameWindow = false;
     }
 
-    if (typeof config.competitorIDs === 'undefined') {
+    if (typeof config.competitorIDs === "undefined") {
       config.competitorIDs = [];
     }
 
-    if (typeof config.competitors === 'undefined') {
+    if (typeof config.competitors === "undefined") {
       config.competitors = [];
     }
 
-    if (typeof config.competitionIDs === 'undefined') {
+    if (typeof config.competitionIDs === "undefined") {
       config.competitionIDs = [];
     }
 
-    if (typeof config.competitions === 'undefined') {
+    if (typeof config.competitions === "undefined") {
       config.competitions = [];
     }
 
-    if (typeof config.listenOnPushState === 'undefined') {
+    if (typeof config.listenOnPushState === "undefined") {
       config.listenOnPushState = false;
     }
 
-    if ((config.competitors.length !== 0 || config.competitions.length !== 0) && !config.sport) {
-      throw invaildeConfig('Sport is required if "competitions" or "competitors" is passed through in the config');
+    if (
+      (config.competitors.length !== 0 || config.competitions.length !== 0) &&
+      !config.sport
+    ) {
+      throw invaildeConfig(
+        'Sport is required if "competitions" or "competitors" is passed through in the config'
+      );
     }
 
     return config;
@@ -782,9 +832,11 @@
     };
   }
 
-  var version = '1.0.0';
+  // import "whatwg-fetch";
 
-  var Fresh8 = function Fresh8 (config) {
+  var version = "1.0.0";
+
+  var Fresh8 = function Fresh8(config) {
     // Ad class
     this.Ad = Ad;
     // Adds polyfills for custome events.
@@ -843,8 +895,10 @@
       // Create a new ad and
       var ad = new this$1.Ad(config);
       // Store the ad for reference
+      console.log("this.ads", this$1.ads);
       this$1.ads.push(ad);
       // Load the ad a return the promise
+      console.log("requestAd in index js");
       return resolve(ad.load());
     });
   };
@@ -887,9 +941,17 @@
    */
   Fresh8.prototype._addEventLisnters = function _addEventLisnters () {
     this.boundOnCreativeLoaded = this._onCreativeLoaded.bind(this);
-    this.boundOnHistoryPushStateChange = this._onHistoryPushStateChange.bind(this);
-    this.window.addEventListener('__f8-creative-script-loaded', this.boundOnCreativeLoaded);
-    this.window.addEventListener('__f8-history-push-state', this.boundOnHistoryPushStateChange);
+    this.boundOnHistoryPushStateChange = this._onHistoryPushStateChange.bind(
+      this
+    );
+    this.window.addEventListener(
+      "__f8-creative-script-loaded",
+      this.boundOnCreativeLoaded
+    );
+    this.window.addEventListener(
+      "__f8-history-push-state",
+      this.boundOnHistoryPushStateChange
+    );
   };
 
   /**
@@ -897,8 +959,14 @@
    * lisnters from the window
    */
   Fresh8.prototype._removeEventLisnters = function _removeEventLisnters () {
-    this.window.removeEventListener('__f8-creative-script-loaded', this.boundOnCreativeLoaded);
-    this.window.removeEventListener('__f8-history-push-state', this.boundOnHistoryPushStateChange);
+    this.window.removeEventListener(
+      "__f8-creative-script-loaded",
+      this.boundOnCreativeLoaded
+    );
+    this.window.removeEventListener(
+      "__f8-history-push-state",
+      this.boundOnHistoryPushStateChange
+    );
   };
 
   /**
@@ -907,6 +975,7 @@
    * @param {Object} event is a custom event object
    */
   Fresh8.prototype._onCreativeLoaded = function _onCreativeLoaded (event) {
+    console.log("here546456456");
     // Cache the creative factory so we can re used it for other ads
     this.creativeFactoryCache.put(event.creativeRef, event.creativeFactory);
 
