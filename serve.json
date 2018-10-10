@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "demo-server/browser.js",
+      "destination": "../../dist/browser.js"
+    },
+    {
+      "source": "demo-server/:type",
+      "destination": "demo-server/:type.html"
+    }
+  ]
+}

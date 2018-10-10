@@ -97,6 +97,7 @@ export default class Ad {
       // Make the API request to the ad server
       requestAdData(requestConfig)
         .then(payload => {
+          console.log("request ad data payload", payload);
           const resolvers = {
             resolve,
             reject

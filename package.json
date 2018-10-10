@@ -13,7 +13,8 @@
     "cov": "open ./test/unit/coverage/lcov-report/index.html",
     "lint": "eslint src/ test/unit/",
     "preversion": "yarn test",
-    "postversion": "git push && git push --tags"
+    "postversion": "git push && git push --tags",
+    "start": "serve demo-server"
   },
   "bugs": {
     "url": "https://github.com/fresh8/js-module/issues"
@@ -70,6 +71,7 @@
   "dependencies": {
     "es6-promise": "^3.3.1",
     "karma-rollup-preprocessor": "^6.0.1",
+    "serve": "^10.0.2",
     "whatwg-fetch": "^1.0.0"
   }
 }

@@ -196,7 +196,9 @@
    * @return {Promise}
    */
   function requestAdData(config) {
+    console.log("config in request ad data", config);
     var vaildatedConfig = vaildateRequestAdConf(config);
+    console.log("validated config in request ad config", vaildatedConfig);
     // Build the end point URL with the slot ID
     console.log(vaildatedConfig);
     var endpoint = constructRequestURL(vaildatedConfig.endpoint, {
@@ -217,7 +219,7 @@
         vaildatedConfig.url
       )
     });
-    console.log(endpoint);
+    console.log("endpoint", endpoint);
     console.log("here 4444");
     return fetch(endpoint, { credentials: "include" })
       .then(checkStatusCode)
@@ -452,6 +454,7 @@
       // Make the API request to the ad server
       requestAdData(requestConfig)
         .then(function (payload) {
+          console.log("request ad data payload", payload);
           var resolvers = {
             resolve: resolve,
             reject: reject

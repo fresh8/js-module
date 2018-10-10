@@ -25,7 +25,9 @@ import { invaildeConfig } from "../errors";
  * @return {Promise}
  */
 export function requestAdData(config) {
+  console.log("config in request ad data", config);
   const vaildatedConfig = vaildateRequestAdConf(config);
+  console.log("validated config in request ad config", vaildatedConfig);
   // Build the end point URL with the slot ID
   console.log(vaildatedConfig);
   const endpoint = constructRequestURL(vaildatedConfig.endpoint, {
@@ -46,7 +48,7 @@ export function requestAdData(config) {
       vaildatedConfig.url
     )
   });
-  console.log(endpoint);
+  console.log("endpoint", endpoint);
   console.log("here 4444");
   return fetch(endpoint, { credentials: "include" })
     .then(checkStatusCode)
