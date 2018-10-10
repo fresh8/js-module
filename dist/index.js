@@ -29,6 +29,7 @@ function getWindow(shouldBreak) {
       }
     } catch (e) {}
   }
+  console.log(workingWindow);
   return workingWindow;
 }
 
@@ -410,6 +411,8 @@ var Ad = function Ad(config) {
   this.creativeFactoryCache = config.creativeFactoryCache;
   // window is a refernce to the window object used when make API requests.
   this.window = config.window;
+  // is it an evo product (default to false)
+  this.evo = false;
 };
 
 /**
@@ -457,7 +460,6 @@ Ad.prototype.load = function load () {
 
         if (!payload.env) {
           Object.keys(payload).forEach(function (creativeRef) {
-            console.log(creativeRef);
             this$1.creativeRef = creativeRef;
             this$1.CSSPath = payload[creativeRef].CSSPath;
             this$1.data = payload[creativeRef].instances[0].data;
@@ -466,9 +468,8 @@ Ad.prototype.load = function load () {
             this$1.data.appendPoint = this$1.config.appendPoint;
           });
         } else if (payload.env) {
-          console.log("evo");
+          this$1.evo = true;
           Object.keys(payload.products).forEach(function (product) {
-            console.log("product", payload.products[product]);
             this$1.creativeRef = payload.products[product].config;
             this$1.CSSPath = payload.products[product].skin;
             // this.CSSPath = `${payload.env.cdn}/${
@@ -491,15 +492,12 @@ Ad.prototype.load = function load () {
         // Pass the data directly to the ad if we already have it's factory
         // cached.
         if (!this$1.awaitingFactory) {
-          console.log("here646464");
           this$1._callCreativeFactory();
           // Else just script for the ad factory and pass the data too it once
           // the loaded event has been emited.
         } else {
           // Inject the ad factory script and wait for the load event
-          console.log(this$1.CSSPath);
           injectScriptFactory(this$1.creativePath);
-          console.log(this$1);
         }
       })
 
@@ -521,7 +519,6 @@ Ad.prototype.reload = function reload () {
     var this$1 = this;
 
   return new Promise(function (resolve, reject) {
-    console.log("reload");
     var requestConfig = {
       slotID: this$1.config.slotID,
       view: this$1.config.view,
@@ -889,12 +886,12 @@ Fresh8.prototype.requestAd = function requestAd (config) {
     config.window = this$1.window;
     config.creativeFactoryCache = this$1.creativeFactoryCache;
     // Create a new ad and
+    console.log("config in request ad", config);
     var ad = new this$1.Ad(config);
+
     // Store the ad for reference
-    console.log("this.ads", this$1.ads);
     this$1.ads.push(ad);
     // Load the ad a return the promise
-    console.log("requestAd in index js");
     return resolve(ad.load());
   });
 };
@@ -936,12 +933,17 @@ Fresh8.prototype.destroyAllAds = function destroyAllAds () {
  * lisnters to the window
  */
 Fresh8.prototype._addEventLisnters = function _addEventLisnters () {
+  console.log("add event listeners");
   this.boundOnCreativeLoaded = this._onCreativeLoaded.bind(this);
   this.boundOnHistoryPushStateChange = this._onHistoryPushStateChange.bind(
     this
   );
   this.window.addEventListener(
     "__f8-creative-script-loaded",
+    this.boundOnCreativeLoaded
+  );
+  this.window.addEventListener(
+    "__f8-product-script-loaded",
     this.boundOnCreativeLoaded
   );
   this.window.addEventListener(
@@ -960,6 +962,10 @@ Fresh8.prototype._removeEventLisnters = function _removeEventLisnters () {
     this.boundOnCreativeLoaded
   );
   this.window.removeEventListener(
+    "__f8-product-script-loaded",
+    this.boundOnCreativeLoaded
+  );
+  this.window.removeEventListener(
     "__f8-history-push-state",
     this.boundOnHistoryPushStateChange
   );
@@ -971,18 +977,26 @@ Fresh8.prototype._removeEventLisnters = function _removeEventLisnters () {
  * @param {Object} event is a custom event object
  */
 Fresh8.prototype._onCreativeLoaded = function _onCreativeLoaded (event) {
-  console.log("here546456456");
   // Cache the creative factory so we can re used it for other ads
   this.creativeFactoryCache.put(event.creativeRef, event.creativeFactory);
-
+  console.log("this in creative loaded", this);
   // Loop over the ads and check if any that require a creative factory
   // with the matching creative ref
   this.ads.forEach(function (ad) {
-    if (ad.awaitingFactory && event.creativeRef === ad.creativeRef) {
-      // Set the creative factory
-      ad._setCreativeFactory(event.creativeFactory);
-      // Call the creative factory loading the ad onto the page
-      ad._callCreativeFactory();
+    if (ad.evo) {
+      if (ad.awaitingFactory && event.config === ad.creativeRef) {
+        // Set the creative factory
+        ad._setCreativeFactory(event.productFactory);
+        // Call the creative factory loading the ad onto the page
+        ad._callCreativeFactory();
+      }
+    } else {
+      if (ad.awaitingFactory && event.creativeRef === ad.creativeRef) {
+        // Set the creative factory
+        ad._setCreativeFactory(event.creativeFactory);
+        // Call the creative factory loading the ad onto the page
+        ad._callCreativeFactory();
+      }
     }
   });
 };

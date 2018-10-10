@@ -62,6 +62,8 @@ export default class Ad {
     this.creativeFactoryCache = config.creativeFactoryCache;
     // window is a refernce to the window object used when make API requests.
     this.window = config.window;
+    // is it an evo product (default to false)
+    this.evo = false;
   }
 
   /**
@@ -107,7 +109,6 @@ export default class Ad {
 
           if (!payload.env) {
             Object.keys(payload).forEach(creativeRef => {
-              console.log(creativeRef);
               this.creativeRef = creativeRef;
               this.CSSPath = payload[creativeRef].CSSPath;
               this.data = payload[creativeRef].instances[0].data;
@@ -116,9 +117,8 @@ export default class Ad {
               this.data.appendPoint = this.config.appendPoint;
             });
           } else if (payload.env) {
-            console.log("evo");
+            this.evo = true;
             Object.keys(payload.products).forEach(product => {
-              console.log("product", payload.products[product]);
               this.creativeRef = payload.products[product].config;
               this.CSSPath = payload.products[product].skin;
               // this.CSSPath = `${payload.env.cdn}/${
@@ -143,15 +143,12 @@ export default class Ad {
           // Pass the data directly to the ad if we already have it's factory
           // cached.
           if (!this.awaitingFactory) {
-            console.log("here646464");
             this._callCreativeFactory();
             // Else just script for the ad factory and pass the data too it once
             // the loaded event has been emited.
           } else {
             // Inject the ad factory script and wait for the load event
-            console.log(this.CSSPath);
             injectScriptFactory(this.creativePath);
-            console.log(this);
           }
         })
 
@@ -171,7 +168,6 @@ export default class Ad {
    */
   reload() {
     return new Promise((resolve, reject) => {
-      console.log("reload");
       const requestConfig = {
         slotID: this.config.slotID,
         view: this.config.view,

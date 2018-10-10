@@ -18,6 +18,7 @@ export function getWindow(shouldBreak) {
       }
     } catch (e) {}
   }
+  console.log(workingWindow);
   return workingWindow;
 }
 
