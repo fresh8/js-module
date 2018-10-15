@@ -15,10 +15,8 @@ context('Evo', () => {
 
   it('Should allow you to request an ads', () => {
     return cy.window().then(window => {
-      expect(function () {
-        return window.fresh8.requestAd({ slotID: 'f8-5', appendPoint: 'body', view: 'football' });
-      }).to.not.throw();
-    });
+      return window.fresh8.requestAd({ slotID: 'f8-5', appendPoint: 'body', view: 'football' });
+    });π
   });
 
   it('Should allow you to reload the ads', () => {

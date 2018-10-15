@@ -28,7 +28,7 @@ context('Standardised', () => {
   // });
 
   it('Should allow you to remove the ads', () => {
-    cy.window().should(window => {
+    return cy.window().then(window => {
       expect(() => {
         return window.fresh8.remove();
       }).to.not.throw();

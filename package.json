@@ -14,7 +14,7 @@
     "lint": "eslint src/ test/unit/ test/integration",
     "preversion": "yarn test",
     "postversion": "git push && git push --tags",
-    "start": "serve demo-server",
+    "start": "serve",
     "ci": "start-server-and-test start 5000 test:integration",
     "test:integration": "cypress run",
     "test:integration-watch": "cypress open",

@@ -45,7 +45,7 @@ jobs:
         paths:
         - ~/.cache
     - run:
-        name: Building packages
+        name: Running Integration Tests
         command: yarn test:integration
     - store_artifacts:
         path: cypress/videos
@@ -70,7 +70,7 @@ jobs:
           paths:
           - ~/.cache
       - run:
-          name: Running Tests
+          name: Running Unit Tests
           command: yarn build
 
 workflows:
