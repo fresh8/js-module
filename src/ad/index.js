@@ -1,6 +1,6 @@
-import { requestAdData } from "../api/index";
-import { injectScriptFactory } from "../util";
-import { invaildeConfig } from "../errors";
+import { requestAdData } from '../api/index';
+import { injectScriptFactory } from '../util';
+import { invaildeConfig } from '../errors';
 
 export default class Ad {
   /**
@@ -26,7 +26,7 @@ export default class Ad {
    *                       , url: 'http://fresh8gaming.com' - optional
    *                       }
    */
-  constructor(config = {}) {
+  constructor (config = {}) {
     // Use to indercate if the ad has been distroyed.
     this.active = false;
     // awaitingFactory is used when slecting what ad classes require an creative
@@ -72,7 +72,7 @@ export default class Ad {
    * @return {Promise} Resolve when the ad finishes loading and returns an
    *                   instance of the ad class.
    */
-  load() {
+  load () {
     return new Promise((resolve, reject) => {
       // Construct the object for the request data
       const requestConfig = {
@@ -93,11 +93,9 @@ export default class Ad {
         url: this.config.url,
         brand: this.config.brand
       };
-      console.log(requestConfig);
       // Make the API request to the ad server
       requestAdData(requestConfig)
         .then(payload => {
-          console.log("request ad data payload", payload);
           const resolvers = {
             resolve,
             reject
@@ -137,7 +135,7 @@ export default class Ad {
           // If the ad is adhesion then it wont use the normal append point
           // container selector.
           if (this.env.adhesion) {
-            this.selector = "#f8-adhesion";
+            this.selector = '#f8-adhesion';
           } else {
             this.selector = `${this.config.appendPoint} .f8${this.creativeRef}`;
           }
@@ -167,7 +165,7 @@ export default class Ad {
    * loaded will be called by the ad.
    * @return {Promise} Resolve when the ad finishes loading
    */
-  reload() {
+  reload () {
     return new Promise((resolve, reject) => {
       const requestConfig = {
         slotID: this.config.slotID,
@@ -233,7 +231,7 @@ export default class Ad {
    * Removes the ad from the DOM and cleans up any brand scripts added.
    * @return {Promise} Resolves when finished.
    */
-  destroy() {
+  destroy () {
     // Only distroy the ad if it's currently active
     if (this.active) {
       const appEl = document.querySelector(this.selector);
@@ -249,7 +247,7 @@ export default class Ad {
    * in the cache, otherwise it will inject a new script for it and wait for it
    * load.
    */
-  _switchAdType() {
+  _switchAdType () {
     if (this.creativeFactoryCache.exists(this.creativeRef)) {
       this._setCreativeFactory(this.creativeFactoryCache.get(this.creativeRef));
     } else {
@@ -263,8 +261,7 @@ export default class Ad {
    * also sets the state to not be waiting for a creative factory.
    * @param {Function} creativeFactory is the creative factory you want to set.
    */
-  _setCreativeFactory(creativeFactory) {
-    console.log("here ierwoiewhr");
+  _setCreativeFactory (creativeFactory) {
     this.awaitingFactory = false;
     this.creativeFactory = creativeFactory;
   }
@@ -274,7 +271,7 @@ export default class Ad {
    * @return {Promise} Resolves after the creative has been loaded on to the
    * page.
    */
-  _callCreativeFactory() {
+  _callCreativeFactory () {
     if (!this.awaitingFactory) {
       return this.creativeFactory(
         this.env,
@@ -299,59 +296,59 @@ export default class Ad {
  * @param  {Object} config is the configurations you want to vaildate.
  * @return {Object}        the vaildated config.
  */
-export function vaildateConfig(config = {}) {
-  if (typeof config.endpoint === "undefined" || config.endpoint === "") {
+export function vaildateConfig (config = {}) {
+  if (typeof config.endpoint === 'undefined' || config.endpoint === '') {
     throw invaildeConfig('Missing "endpoint"');
   }
 
   if (
-    typeof config.creativeFactoryCache === "undefined" ||
-    config.creativeFactoryCache === ""
+    typeof config.creativeFactoryCache === 'undefined' ||
+    config.creativeFactoryCache === ''
   ) {
     throw invaildeConfig('Missing "creativeFactoryCache"');
   }
 
-  if (typeof config.slotID === "undefined" || config.slotID === "") {
+  if (typeof config.slotID === 'undefined' || config.slotID === '') {
     throw invaildeConfig('Missing "slotID"');
   }
 
-  if (typeof config.appendPoint === "undefined" || config.appendPoint === "") {
+  if (typeof config.appendPoint === 'undefined' || config.appendPoint === '') {
     throw invaildeConfig('Missing "appendPoint"');
   }
 
-  if (typeof config.window === "undefined" || config.window === "") {
+  if (typeof config.window === 'undefined' || config.window === '') {
     throw invaildeConfig('Missing "window"');
   }
 
-  if (typeof config.inApp === "undefined") {
+  if (typeof config.inApp === 'undefined') {
     config.inApp = false;
   }
 
-  if (typeof config.shouldBreakOut === "undefined") {
+  if (typeof config.shouldBreakOut === 'undefined') {
     config.shouldBreakOut = false;
   }
 
-  if (typeof config.linkSameWindow === "undefined") {
+  if (typeof config.linkSameWindow === 'undefined') {
     config.linkSameWindow = false;
   }
 
-  if (typeof config.competitorIDs === "undefined") {
+  if (typeof config.competitorIDs === 'undefined') {
     config.competitorIDs = [];
   }
 
-  if (typeof config.competitors === "undefined") {
+  if (typeof config.competitors === 'undefined') {
     config.competitors = [];
   }
 
-  if (typeof config.competitionIDs === "undefined") {
+  if (typeof config.competitionIDs === 'undefined') {
     config.competitionIDs = [];
   }
 
-  if (typeof config.competitions === "undefined") {
+  if (typeof config.competitions === 'undefined') {
     config.competitions = [];
   }
 
-  if (typeof config.listenOnPushState === "undefined") {
+  if (typeof config.listenOnPushState === 'undefined') {
     config.listenOnPushState = false;
   }
 

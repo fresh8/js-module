@@ -10,7 +10,7 @@
     "test": "karma start test/unit/karma.conf.js --single-run",
     "build": "rollup -c",
     "dev": "rollup -c -w",
-    "cov": "open ./test/unit/coverage/lcov-report/index.html",
+    "cov": "open ./test/coverage/lcov-report/index.html",
     "lint": "eslint src/ test/unit/",
     "preversion": "yarn test",
     "postversion": "git push && git push --tags",

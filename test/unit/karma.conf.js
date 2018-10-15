@@ -50,7 +50,7 @@ module.exports = function (config) {
       client: { mocha: { timeout: '5000' } },
       specReporter: { },
       coverageReporter:
-      { dir: './coverage',
+      { dir: '../coverage',
         reporters: [
           { type: 'lcov', subdir: '.' },
           { type: 'text', subdir: '.', file: 'coverage.txt' },

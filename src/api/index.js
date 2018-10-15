@@ -1,5 +1,5 @@
-import { getRef } from "../util";
-import { invaildeConfig } from "../errors";
+import { getRef } from '../util';
+import { invaildeConfig } from '../errors';
 
 /**
  * Makes a request to the ad server API building the URL from the config params
@@ -24,12 +24,9 @@ import { invaildeConfig } from "../errors";
  *                         }
  * @return {Promise}
  */
-export function requestAdData(config) {
-  console.log("config in request ad data", config);
+export function requestAdData (config) {
   const vaildatedConfig = vaildateRequestAdConf(config);
-  console.log("validated config in request ad config", vaildatedConfig);
   // Build the end point URL with the slot ID
-  console.log(vaildatedConfig);
   const endpoint = constructRequestURL(vaildatedConfig.endpoint, {
     slot: vaildatedConfig.slotID,
     view: vaildatedConfig.view,
@@ -48,9 +45,7 @@ export function requestAdData(config) {
       vaildatedConfig.url
     )
   });
-  console.log("endpoint", endpoint);
-  console.log("here 4444");
-  return fetch(endpoint, { credentials: "include" })
+  return fetch(endpoint, { credentials: 'include' })
     .then(checkStatusCode)
     .then(parseJSON);
 }
@@ -61,12 +56,12 @@ export function requestAdData(config) {
  * @param  {Object} response is the fetch response object
  * @return {(Promise.reject|Object)} a rejected promise or the reponse object
  */
-export function checkStatusCode(response) {
+export function checkStatusCode (response) {
   if (response.status >= 200 && response.status < 300) {
     return response;
   }
 
-  return Promise.reject("Server returned error: " + response.status);
+  return Promise.reject('Server returned error: ' + response.status);
 }
 
 /**
@@ -74,7 +69,7 @@ export function checkStatusCode(response) {
  * @param  {Object} response is the fetch response object
  * @return {Object} the parsed JSON object
  */
-export function parseJSON(response) {
+export function parseJSON (response) {
   if (response) {
     return response.json();
   }
@@ -87,35 +82,34 @@ export function parseJSON(response) {
  *                          as a query strings.
  * @return {String}         The constructed URL
  */
-export function constructRequestURL(url, options = {}) {
+export function constructRequestURL (url, options = {}) {
   const queryStringsOptions = Object.assign({}, options);
 
-  if (typeof queryStringsOptions.competitorIds !== "undefined") {
+  if (typeof queryStringsOptions.competitorIds !== 'undefined') {
     queryStringsOptions.competitorIds = queryStringsOptions.competitorIds.map(
       value => encodeURIComponent(value)
     );
   }
 
-  if (typeof queryStringsOptions.competitors !== "undefined") {
+  if (typeof queryStringsOptions.competitors !== 'undefined') {
     queryStringsOptions.competitors = queryStringsOptions.competitors.map(
       value => encodeURIComponent(value)
     );
   }
 
-  if (typeof queryStringsOptions.competitionIds !== "undefined") {
+  if (typeof queryStringsOptions.competitionIds !== 'undefined') {
     queryStringsOptions.competitionIds = queryStringsOptions.competitionIds.map(
       value => encodeURIComponent(value)
     );
   }
 
-  if (typeof queryStringsOptions.competitions !== "undefined") {
+  if (typeof queryStringsOptions.competitions !== 'undefined') {
     queryStringsOptions.competitions = queryStringsOptions.competitions.map(
       value => encodeURIComponent(value)
     );
   }
 
   const queryString = buildQueryString(queryStringsOptions);
-  console.log("gugugu:", url + queryString);
   return url + queryString;
 }
 
@@ -124,48 +118,48 @@ export function constructRequestURL(url, options = {}) {
  * @param  {Object} config is the user defined config object
  * @return {Object}        the vaildated object
  */
-export function vaildateRequestAdConf(config = {}) {
-  if (typeof config.endpoint === "undefined" || config.endpoint === "") {
+export function vaildateRequestAdConf (config = {}) {
+  if (typeof config.endpoint === 'undefined' || config.endpoint === '') {
     throw invaildeConfig('Missing "endpoint"');
   }
 
-  if (typeof config.slotID === "undefined" || config.slotID === "") {
+  if (typeof config.slotID === 'undefined' || config.slotID === '') {
     throw invaildeConfig('Missing "slotID"');
   }
 
-  if (typeof config.window === "undefined" || config.window === "") {
+  if (typeof config.window === 'undefined' || config.window === '') {
     throw invaildeConfig('Missing "window"');
   }
 
-  if (typeof config.inApp === "undefined") {
+  if (typeof config.inApp === 'undefined') {
     config.inApp = false;
   }
 
-  if (typeof config.shouldBreakOut === "undefined") {
+  if (typeof config.shouldBreakOut === 'undefined') {
     config.shouldBreakOut = false;
   }
 
-  if (typeof config.linkSameWindow === "undefined") {
+  if (typeof config.linkSameWindow === 'undefined') {
     config.linkSameWindow = false;
   }
 
-  if (typeof config.competitorIDs === "undefined") {
+  if (typeof config.competitorIDs === 'undefined') {
     config.competitorIDs = [];
   }
 
-  if (typeof config.competitors === "undefined") {
+  if (typeof config.competitors === 'undefined') {
     config.competitors = [];
   }
 
-  if (typeof config.competitionIDs === "undefined") {
+  if (typeof config.competitionIDs === 'undefined') {
     config.competitionIDs = [];
   }
 
-  if (typeof config.competitions === "undefined") {
+  if (typeof config.competitions === 'undefined') {
     config.competitions = [];
   }
 
-  if (typeof config.listenOnPushState === "undefined") {
+  if (typeof config.listenOnPushState === 'undefined') {
     config.listenOnPushState = false;
   }
 
@@ -187,16 +181,15 @@ export function vaildateRequestAdConf(config = {}) {
  *                             string values.
  * @return {String} a queryString in the form of `?key=val&keyTwo=valTwo`.
  */
-export function buildQueryString(options) {
-  console.log("options", options);
-  var queryString = "?";
-  Object.keys(options).forEach(function(option) {
+export function buildQueryString (options) {
+  var queryString = '?';
+  Object.keys(options).forEach(function (option) {
     var value = options[option];
-    if (value && value !== "" && value.length !== 0) {
-      if (Object.prototype.toString.call(value) === "[object Array]") {
-        queryString += option + "=" + value.join(",") + "&";
+    if (value && value !== '' && value.length !== 0) {
+      if (Object.prototype.toString.call(value) === '[object Array]') {
+        queryString += option + '=' + value.join(',') + '&';
       } else {
-        queryString += option + "=" + value + "&";
+        queryString += option + '=' + value + '&';
       }
     }
   });

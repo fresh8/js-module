@@ -1,12 +1,12 @@
-// import "whatwg-fetch";
-import Ad from "./ad/index";
-import Cache from "./cache/index";
+import 'whatwg-fetch';
+import Ad from './ad/index';
+import Cache from './cache/index';
 
-import { customEvent, PolyfillHistoryPushState } from "./polyfill";
+import { customEvent, PolyfillHistoryPushState } from './polyfill';
 
-import { getWindow, bindf8ToWindow, vaildateConfig } from "./util";
+import { getWindow, bindf8ToWindow, vaildateConfig } from './util';
 
-const version = "1.0.0";
+const version = '1.0.0';
 
 export default class Fresh8 {
   /**
@@ -22,7 +22,7 @@ export default class Fresh8 {
    *                        For more details on these options please refer to
    *                        the readme.
    */
-  constructor(config) {
+  constructor (config) {
     // Ad class
     this.Ad = Ad;
     // Adds polyfills for custome events.
@@ -69,14 +69,13 @@ export default class Fresh8 {
    * @return {Promise}       This is resolved or rejected based on if the ad
    *                         loaded successfully or not.
    */
-  requestAd(config = {}) {
+  requestAd (config = {}) {
     return new Promise(resolve => {
       // Add Fresh8 class data to request ad config
       config.endpoint = this.config.endpoint;
       config.window = this.window;
       config.creativeFactoryCache = this.creativeFactoryCache;
       // Create a new ad and
-      console.log("config in request ad", config);
       const ad = new this.Ad(config);
 
       // Store the ad for reference
@@ -89,7 +88,7 @@ export default class Fresh8 {
   /**
    * Cleans up any event lisnters/ads added by the class
    */
-  remove() {
+  remove () {
     // Remove any added event lisnters
     this._removeEventLisnters();
     // Remove all the ads from the page
@@ -104,7 +103,7 @@ export default class Fresh8 {
    * Reloads all the currently active ads on the page
    * @return {Promise} containing references to the new ads
    */
-  reloadAllAds() {
+  reloadAllAds () {
     const activeAds = this.ads.filter(ad => ad.active);
     return Promise.all(activeAds.map(ad => ad.reload()));
   }
@@ -113,7 +112,7 @@ export default class Fresh8 {
    * Destroys all currently active ads on the page
    * @return {Promise} resolves on completion
    */
-  destroyAllAds() {
+  destroyAllAds () {
     const activeAds = this.ads.filter(ad => ad.active);
     return Promise.all(activeAds.map(ad => ad.destroy()));
   }
@@ -122,22 +121,21 @@ export default class Fresh8 {
    * Adds the "__f8-creative-script-loaded" and "__f8-history-push-state" event
    * lisnters to the window
    */
-  _addEventLisnters() {
-    console.log("add event listeners");
+  _addEventLisnters () {
     this.boundOnCreativeLoaded = this._onCreativeLoaded.bind(this);
     this.boundOnHistoryPushStateChange = this._onHistoryPushStateChange.bind(
       this
     );
     this.window.addEventListener(
-      "__f8-creative-script-loaded",
+      '__f8-creative-script-loaded',
       this.boundOnCreativeLoaded
     );
     this.window.addEventListener(
-      "__f8-product-script-loaded",
+      '__f8-product-script-loaded',
       this.boundOnCreativeLoaded
     );
     this.window.addEventListener(
-      "__f8-history-push-state",
+      '__f8-history-push-state',
       this.boundOnHistoryPushStateChange
     );
   }
@@ -146,17 +144,17 @@ export default class Fresh8 {
    * Removes the "__f8-creative-script-loaded" and "__f8-history-push-state" event
    * lisnters from the window
    */
-  _removeEventLisnters() {
+  _removeEventLisnters () {
     this.window.removeEventListener(
-      "__f8-creative-script-loaded",
+      '__f8-creative-script-loaded',
       this.boundOnCreativeLoaded
     );
     this.window.removeEventListener(
-      "__f8-product-script-loaded",
+      '__f8-product-script-loaded',
       this.boundOnCreativeLoaded
     );
     this.window.removeEventListener(
-      "__f8-history-push-state",
+      '__f8-history-push-state',
       this.boundOnHistoryPushStateChange
     );
   }
@@ -166,10 +164,9 @@ export default class Fresh8 {
    * ads that match the creative ref and are waiting for a creativeFactory.
    * @param {Object} event is a custom event object
    */
-  _onCreativeLoaded(event) {
+  _onCreativeLoaded (event) {
     // Cache the creative factory so we can re used it for other ads
     this.creativeFactoryCache.put(event.creativeRef, event.creativeFactory);
-    console.log("this in creative loaded", this);
     // Loop over the ads and check if any that require a creative factory
     // with the matching creative ref
     this.ads.forEach(ad => {
@@ -195,7 +192,7 @@ export default class Fresh8 {
    * Handels the push state change event that reloads all the currently active
    * ads on the page
    */
-  _onHistoryPushStateChange() {
+  _onHistoryPushStateChange () {
     this.reloadAllAds().catch();
   }
 }
