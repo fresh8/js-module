@@ -22,11 +22,13 @@ jobs:
         name: running unit tests
         command: yarn test:unit
     - store_artifacts:
-        path: ~/js-module/test/cov
+        path: test/cov
 
   integration-test:
     docker:
-    - image: circleci/node:carbon
+    - image: cypress/base:8
+      environment:
+        TERM: xterm
     working_directory: ~/js-module
     steps:
     - checkout
@@ -46,7 +48,9 @@ jobs:
         name: Building packages
         command: yarn test:integration
     - store_artifacts:
-        path: ~/js-module/cypress
+        path: cypress/videos
+    - store_artifacts:
+        path: cypress/screenshots
   build:
     docker:
       - image: circleci/node:carbon
