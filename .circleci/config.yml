@@ -11,13 +11,13 @@ jobs:
         command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> .npmrc
     - restore_cache:
         keys:
-        - v1-npm-cache-{{ checksum "yarn.lock" }}
-        - v1-npm-cache # used if checksum fails
-    - run: yarn install
+        - v1-yarn-cache-{{ checksum "yarn.lock" }}
+        - v1-yarn-cache # used if checksum fails
+    - run: yarn install --frozen-lockfile
     - save_cache:
-        key: v1-npm-cache-{{ checksum "yarn.lock" }}
+        key: v1-yarn-cache-{{ checksum "yarn.lock" }}
         paths:
-        - ./node_modules/
+        - ~/.cache
     - run:
         name: running unit tests
         command: yarn test:unit
@@ -35,13 +35,13 @@ jobs:
         command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> .npmrc
     - restore_cache:
         keys:
-        - v1-npm-cache-{{ checksum "yarn.lock" }}
-        - v1-npm-cache # used if checksum fails
-    - run: yarn install
+        - v1-yarn-cache-{{ checksum "yarn.lock" }}
+        - v1-yarn-cache # used if checksum fails
+    - run: yarn install --frozen-lockfile
     - save_cache:
-        key: v1-npm-cache-{{ checksum "yarn.lock" }}
+        key: v1-yarn-cache-{{ checksum "yarn.lock" }}
         paths:
-        - ./node_modules/
+        - ~/.cache
     - run:
         name: Building packages
         command: yarn test:integration
@@ -50,7 +50,6 @@ jobs:
   build:
     docker:
       - image: circleci/node:carbon
-
     working_directory: ~/js-module
     steps:
       - checkout
@@ -59,13 +58,13 @@ jobs:
           command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> .npmrc
       - restore_cache:
           keys:
-            - v1-npm-cache-{{ checksum "yarn.lock" }}
-            - v1-npm-cache # used if checksum fails
-      - run: yarn install
+          - v1-yarn-cache-{{ checksum "yarn.lock" }}
+          - v1-yarn-cache # used if checksum fails
+      - run: yarn install --frozen-lockfile
       - save_cache:
-          key: v1-npm-cache-{{ checksum "yarn.lock" }}
+          key: v1-yarn-cache-{{ checksum "yarn.lock" }}
           paths:
-            - ./node_modules/
+          - ~/.cache
       - run:
           name: Running Tests
           command: yarn build
