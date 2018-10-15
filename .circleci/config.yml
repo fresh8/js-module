@@ -75,4 +75,5 @@ workflows:
   test-build:
     jobs:
       - build
-      - test
+      - unit-test
+      - integration-test
