@@ -187,7 +187,7 @@ export default class Ad {
       };
 
       // Request the ad data
-      requestAdData(requestConfig)
+      return requestAdData(requestConfig)
         .then(payload => {
           // Grab the creative ref from the playload
           const creativeRef = Object.keys(payload)[0];
