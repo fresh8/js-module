@@ -1,7 +1,7 @@
 context('Evo', () => {
   beforeEach(() => {
     cy.visit('http://localhost:5000/demo-server/evo');
-    cy.wait(2000);
+    cy.wait(1000);
   });
 
   it('API should exist', () => {
