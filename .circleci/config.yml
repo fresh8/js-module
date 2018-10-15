@@ -1,6 +1,30 @@
 version: 2
 jobs:
-  test:
+  unit-test:
+    docker:
+    - image: circleci/node:carbon
+    working_directory: ~/js-module
+    steps:
+    - checkout
+    - run:
+        name: Set NPM auth token
+        command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> .npmrc
+    - restore_cache:
+        keys:
+        - v1-npm-cache-{{ checksum "yarn.lock" }}
+        - v1-npm-cache # used if checksum fails
+    - run: yarn install
+    - save_cache:
+        key: v1-npm-cache-{{ checksum "yarn.lock" }}
+        paths:
+        - ./node_modules/
+    - run:
+        name: running unit tests
+        command: yarn test:unit
+    - store_artifacts:
+        path: ~/js-module/test/cov
+
+  integration-test:
     docker:
     - image: circleci/node:carbon
     working_directory: ~/js-module
@@ -20,7 +44,9 @@ jobs:
         - ./node_modules/
     - run:
         name: Building packages
-        command: yarn test
+        command: yarn test:integration
+    - store_artifacts:
+        path: ~/js-module/cypress
   build:
     docker:
       - image: circleci/node:carbon

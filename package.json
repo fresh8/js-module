@@ -14,7 +14,11 @@
     "lint": "eslint src/ test/unit/ test/integration",
     "preversion": "yarn test",
     "postversion": "git push && git push --tags",
-    "start": "serve demo-server"
+    "start": "serve demo-server",
+    "ci": "start-server-and-test start 5000 test:integration",
+    "test:integration": "cypress run",
+    "test:integration-watch": "cypress open",
+    "test:unit": "karma start test/unit/karma.conf.js --single-run"
   },
   "bugs": {
     "url": "https://github.com/fresh8/js-module/issues"
@@ -71,6 +75,7 @@
     "sinon": "^1.17.5",
     "sinon-chai": "^2.8.0",
     "source-map-support": "^0.4.2",
+    "start-server-and-test": "^1.7.4",
     "webpack": "^1.12.2",
     "webpack-merge": "^0.14.1"
   },
