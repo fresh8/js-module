@@ -191,7 +191,12 @@ export default class Ad {
       return requestAdData(requestConfig)
         .then(payload => {
           // Grab the creative ref from the playload
-          const creativeRef = Object.keys(payload)[0];
+          let creativeRef;
+          if (this.evo) {
+            creativeRef = payload.products[0].config;
+          } else {
+            creativeRef = Object.keys(payload)[0];
+          }
           const resolvers = {
             resolve,
             reject
@@ -206,7 +211,13 @@ export default class Ad {
           // the currently set creative ref/creative path in the class.
           if (creativeRef !== this.creativeRef) {
             this.creativeRef = creativeRef;
-            this.creativePath = payload[creativeRef].creativePath;
+            if (this.evo) {
+              this.creativePath = `${payload.env.cdn}/${
+                payload.products[0].config
+                }.js?v=${payload.env.version}`;
+            } else {
+              this.creativePath = payload[creativeRef].creativePath;
+            }
             this._switchAdType();
           }
           if (this.evo) {
@@ -244,7 +255,7 @@ export default class Ad {
       const appEl = document.querySelector(this.selector);
       // Remove the ad and the brand CSS
       this.adInstance.destroy();
-      appEl.parentNode.removeChild(appEl);
+      if (!this.evo) appEl.parentNode.removeChild(appEl);
       this.active = false;
     }
   }
