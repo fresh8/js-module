@@ -354,33 +354,6 @@ describe('src/ad/index.js', () => {
         expect(document.querySelector('#test-el')).to.equal(null);
       });
 
-      it('Should destroy the ad instance and remove it from the DOM', () => {
-        const config = {
-          endpoint: 'https://fresh8.co/123/raw',
-          slotID: '123',
-          appendPoint: 'body',
-          creativeFactoryCache: {},
-          window
-        };
-
-        const div = document.createElement('div');
-        div.id = 'test-el';
-        document.body.appendChild(div);
-
-        const adInstanceSpy = sinon.spy();
-        const ad = new Ad(config);
-        ad.active = true;
-        ad.evo = true;
-        ad.adInstance = { destroy: adInstanceSpy };
-        ad.selector = '#test-el';
-
-        ad.destroy();
-
-        expect(adInstanceSpy.called).to.equal(true);
-        expect(ad.active).to.equal(false);
-        expect(document.querySelector('#test-el')).to.equal(null);
-      });
-
       it('Shouldn\'t distroy the ad instance if not active', () => {
         const config = {
           endpoint: 'https://fresh8.co/123/raw',
