@@ -22,7 +22,7 @@ jobs:
         name: running unit tests
         command: yarn test:unit
     - store_artifacts:
-        path: test/cov
+        path: test/coverage
 
   integration-test:
     docker:
