@@ -46,7 +46,7 @@ jobs:
         - ~/.cache
     - run:
         name: Running Integration Tests
-        command: yarn test:integration
+        command: yarn ci
     - store_artifacts:
         path: cypress/videos
     - store_artifacts:
