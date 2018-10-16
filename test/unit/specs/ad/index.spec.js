@@ -171,6 +171,33 @@ describe('src/ad/index.js', () => {
             removeScriptTag('http://localhost:9876/creative-factory.js');
           });
       });
+
+      it('Should load an evo ad if env is in the top level of the payload', () => {
+        const config = {
+          endpoint: 'https://fresh8.co/123/raw',
+          slotID: '123',
+          appendPoint: 'body',
+          creativeFactoryCache: {},
+          window
+        };
+
+        const fetchStub = sinon.stub(window, 'fetch');
+        const body = {
+          env: {cdn: 'http://cdn.fresh8.co'},
+          products: [{config: 'creativeRef', skin: 'f8', instances: [{}]}]
+        };
+
+        fetchStub.returns(Promise.resolve(mockFetchResponse(body)));
+        const ad = new Ad(config);
+        return ad
+          .load().catch(e => console.log(e))
+          .then(() => {
+            expect(ad.evo).to.equal(true);
+
+            fetchStub.restore();
+            removeScriptTag('http://localhost:9876/creative-factory.js');
+          });
+      });
     });
 
     describe('reload', () => {
@@ -214,6 +241,45 @@ describe('src/ad/index.js', () => {
             fetchStub.restore();
             removeScriptTag('http://localhost:9876/creative-factory.js');
             done();
+          });
+      });
+
+      it('Should request new data for evo ads', () => {
+        const config = {
+          endpoint: 'https://fresh8.co/123/raw',
+          slotID: '123',
+          appendPoint: 'body',
+          creativeFactoryCache: {},
+          window
+        };
+
+        const fetchStub = sinon.stub(window, 'fetch');
+        const body = {
+          env: {cdn: 'http://cdn.fresh8.co', version: '1'},
+          products: [{config: 'creativeRef', skin: 'f8', instances: [{}]}]
+        };
+
+        fetchStub.returns(Promise.resolve(mockFetchResponse(body)));
+        const ad = new Ad(config);
+        ad.evo = true;
+        ad.creativeRef = 'creativeRef1';
+        ad._callCreativeFactory = function () { };
+        ad.destroy = function () { };
+        const switchAdTypeStub = sinon.stub(ad, '_switchAdType');
+        switchAdTypeStub.returns(function () {});
+
+        // Simulate a network request injecting a creative factory
+        setTimeout(() => {
+          ad.loadResolvers.resolve(ad);
+        }, 500);
+
+        return ad
+          .reload()
+          .then(() => {
+            expect(ad.env).to.deep.equal(body.env);
+
+            fetchStub.restore();
+            removeScriptTag('http://localhost:9876/creative-factory.js');
           });
       });
 
@@ -262,7 +328,7 @@ describe('src/ad/index.js', () => {
     });
 
     describe('destroy', () => {
-      it('Should distroy the ad instance and remove it from the DOM', () => {
+      it('Should destroy the ad instance and remove it from the DOM', () => {
         const config = {
           endpoint: 'https://fresh8.co/123/raw',
           slotID: '123',
@@ -278,6 +344,33 @@ describe('src/ad/index.js', () => {
         const adInstanceSpy = sinon.spy();
         const ad = new Ad(config);
         ad.active = true;
+        ad.adInstance = { destroy: adInstanceSpy };
+        ad.selector = '#test-el';
+
+        ad.destroy();
+
+        expect(adInstanceSpy.called).to.equal(true);
+        expect(ad.active).to.equal(false);
+        expect(document.querySelector('#test-el')).to.equal(null);
+      });
+
+      it('Should destroy the ad instance and remove it from the DOM', () => {
+        const config = {
+          endpoint: 'https://fresh8.co/123/raw',
+          slotID: '123',
+          appendPoint: 'body',
+          creativeFactoryCache: {},
+          window
+        };
+
+        const div = document.createElement('div');
+        div.id = 'test-el';
+        document.body.appendChild(div);
+
+        const adInstanceSpy = sinon.spy();
+        const ad = new Ad(config);
+        ad.active = true;
+        ad.evo = true;
         ad.adInstance = { destroy: adInstanceSpy };
         ad.selector = '#test-el';
 

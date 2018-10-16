@@ -94,7 +94,7 @@ export default class Ad {
         brand: this.config.brand
       };
       // Make the API request to the ad server
-      requestAdData(requestConfig)
+      return requestAdData(requestConfig)
         .then(payload => {
           const resolvers = {
             resolve,
@@ -112,7 +112,7 @@ export default class Ad {
             Object.keys(payload.products).forEach(product => {
               this.creativeRef = payload.products[product].config;
               this.CSSPath = payload.products[product].skin;
-                // this.CSSPath = `${payload.env.cdn}/${
+              // this.CSSPath = `${payload.env.cdn}/${
                 //   payload.products[product].skin
                 // }.json`;
               this.data = payload.products[product].instances[0];
@@ -132,9 +132,9 @@ export default class Ad {
               this.data.appendPoint = this.config.appendPoint;
             });
           }
-
           // If the ad is adhesion then it wont use the normal append point
           // container selector.
+
           if (this.env.adhesion) {
             this.selector = '#f8-adhesion';
           } else {
@@ -143,15 +143,15 @@ export default class Ad {
           // Pass the data directly to the ad if we already have it's factory
           // cached.
           if (!this.awaitingFactory) {
-            this._callCreativeFactory();
+            return this._callCreativeFactory();
             // Else just script for the ad factory and pass the data too it once
             // the loaded event has been emited.
           } else {
             // Inject the ad factory script and wait for the load event
             injectScriptFactory(this.creativePath);
+            return resolve();
           }
         })
-
         .catch(reason => {
           this.active = false;
           reject(reason);

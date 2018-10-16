@@ -18,7 +18,8 @@
     "ci": "start-server-and-test start 5000 test:integration",
     "test:integration": "cypress run",
     "test:integration-watch": "cypress open",
-    "test:unit": "karma start test/unit/karma.conf.js --single-run"
+    "test:unit": "karma start test/unit/karma.conf.js --single-run",
+    "test:unit-watch": "karma start test/unit/karma.conf.js"
   },
   "bugs": {
     "url": "https://github.com/fresh8/js-module/issues"

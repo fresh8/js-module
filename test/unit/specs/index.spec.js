@@ -117,7 +117,7 @@ describe('src/index.js', () => {
     });
 
     describe('_onCreativeLoaded', () => {
-      it('Should set a factory on eact add that matches the creative ref and ', () => {
+      it('Should set a factory on each ad that matches the creative ref and ', () => {
         const fresh8 = new Fresh8({ instID: '123' });
         const creativeFactorySpy = sinon.spy();
         const setCreativeFactorySpyOne = sinon.spy();
@@ -145,6 +145,43 @@ describe('src/index.js', () => {
         ];
 
         fresh8._onCreativeLoaded({ creativeFactory: creativeFactorySpy, creativeRef: '1' });
+
+        expect(setCreativeFactorySpyOne.called).to.equal(true);
+        expect(callCreativeFactorySpyOne.called).to.equal(true);
+
+        fresh8.remove();
+      });
+
+      it('Should set a factory on each evo ad that matches the creative ref and ', () => {
+        const fresh8 = new Fresh8({ instID: '123' });
+        const creativeFactorySpy = sinon.spy();
+        const setCreativeFactorySpyOne = sinon.spy();
+        const callCreativeFactorySpyOne = sinon.spy();
+        const setCreativeFactorySpyTwo = sinon.spy();
+        const callCreativeFactorySpyTwo = sinon.spy();
+
+        fresh8.ads = [
+          {
+            active: true,
+            awaitingFactory: true,
+            creativeRef: '1',
+            destroy: () => {},
+            _setCreativeFactory: setCreativeFactorySpyOne,
+            _callCreativeFactory: callCreativeFactorySpyOne,
+            evo: true
+          },
+          {
+            active: true,
+            awaitingFactory: false,
+            creativeRef: '1',
+            destroy: () => {},
+            _setCreativeFactory: setCreativeFactorySpyTwo,
+            _callCreativeFactory: callCreativeFactorySpyTwo,
+            evo: true
+          }
+        ];
+
+        fresh8._onCreativeLoaded({ productFactory: creativeFactorySpy, config: '1' });
 
         expect(setCreativeFactorySpyOne.called).to.equal(true);
         expect(callCreativeFactorySpyOne.called).to.equal(true);
