@@ -94,7 +94,7 @@ export default class Ad {
         brand: this.config.brand
       };
       // Make the API request to the ad server
-      requestAdData(requestConfig)
+      return requestAdData(requestConfig)
         .then(payload => {
           const resolvers = {
             resolve,
@@ -105,8 +105,24 @@ export default class Ad {
           this.loadResolvers = resolvers;
           // if env exists assume it
           // Inject the scripts for each ad.
-
-          if (!payload.env) {
+          if (payload.env) {
+            this.evo = true;
+          }
+          if (this.evo) {
+            Object.keys(payload.products).forEach(product => {
+              this.creativeRef = payload.products[product].config;
+              this.CSSPath = payload.products[product].skin;
+              // this.CSSPath = `${payload.env.cdn}/${
+                //   payload.products[product].skin
+                // }.json`;
+              this.data = payload.products[product].instances[0];
+              this.env = payload.env;
+              this.creativePath = `${payload.env.cdn}/${
+                  payload.products[product].config
+                  }.js?v=${payload.env.version}`;
+              this.data.appendPoint = this.config.appendPoint;
+            });
+          } else {
             Object.keys(payload).forEach(creativeRef => {
               this.creativeRef = creativeRef;
               this.CSSPath = payload[creativeRef].CSSPath;
@@ -115,25 +131,10 @@ export default class Ad {
               this.creativePath = payload[creativeRef].creativePath;
               this.data.appendPoint = this.config.appendPoint;
             });
-          } else if (payload.env) {
-            this.evo = true;
-            Object.keys(payload.products).forEach(product => {
-              this.creativeRef = payload.products[product].config;
-              this.CSSPath = payload.products[product].skin;
-              // this.CSSPath = `${payload.env.cdn}/${
-              //   payload.products[product].skin
-              // }.json`;
-              this.data = payload.products[product].instances[0];
-              this.env = payload.env;
-              this.creativePath = `${payload.env.cdn}/${
-                payload.products[product].config
-              }.js?v=${payload.env.version}`;
-              this.data.appendPoint = this.config.appendPoint;
-            });
           }
-
           // If the ad is adhesion then it wont use the normal append point
           // container selector.
+
           if (this.env.adhesion) {
             this.selector = '#f8-adhesion';
           } else {
@@ -142,15 +143,15 @@ export default class Ad {
           // Pass the data directly to the ad if we already have it's factory
           // cached.
           if (!this.awaitingFactory) {
-            this._callCreativeFactory();
+            return this._callCreativeFactory();
             // Else just script for the ad factory and pass the data too it once
             // the loaded event has been emited.
           } else {
             // Inject the ad factory script and wait for the load event
             injectScriptFactory(this.creativePath);
+            return resolve();
           }
         })
-
         .catch(reason => {
           this.active = false;
           reject(reason);
@@ -187,10 +188,15 @@ export default class Ad {
       };
 
       // Request the ad data
-      requestAdData(requestConfig)
+      return requestAdData(requestConfig)
         .then(payload => {
           // Grab the creative ref from the playload
-          const creativeRef = Object.keys(payload)[0];
+          let creativeRef;
+          if (this.evo) {
+            creativeRef = payload.products[0].config;
+          } else {
+            creativeRef = Object.keys(payload)[0];
+          }
           const resolvers = {
             resolve,
             reject
@@ -205,19 +211,31 @@ export default class Ad {
           // the currently set creative ref/creative path in the class.
           if (creativeRef !== this.creativeRef) {
             this.creativeRef = creativeRef;
-            this.creativePath = payload[creativeRef].creativePath;
+            if (this.evo) {
+              this.creativePath = `${payload.env.cdn}/${
+                payload.products[0].config
+                }.js?v=${payload.env.version}`;
+            } else {
+              this.creativePath = payload[creativeRef].creativePath;
+            }
             this._switchAdType();
           }
+          if (this.evo) {
+            Object.keys(payload.products).forEach(product => {
+              this.CSSPath = payload.products[product].skin;
+              this.data = payload.products[product].instances[0];
+              this.env = payload.env;
+              this.data.appendPoint = this.config.appendPoint;
+            });
+          } else {
+            Object.keys(payload).forEach(creativeRef => {
+              this.CSSPath = payload[creativeRef].CSSPath;
+              this.data = payload[creativeRef].instances[0].data;
+              this.env = payload[creativeRef].instances[0].env;
+              this.data.appendPoint = this.config.appendPoint;
+            });
+          }
 
-          // Update the data state.
-          this.data = payload[this.creativeRef].instances[0].data;
-          // Update the env data.
-          this.env = payload[this.creativeRef].instances[0].env;
-          // Update the CSS file path.
-          this.CSSPath = payload[this.creativeRef].CSSPath;
-          // Force the append point in the data to match the one that the class
-          // is using.
-          this.data.appendPoint = this.config.appendPoint;
           // Update the class selector based on the brand being used
           this.selector = `${this.config.appendPoint} .f8${this.creativeRef}`;
           // Finally call the creative factory to create the ad
@@ -237,7 +255,7 @@ export default class Ad {
       const appEl = document.querySelector(this.selector);
       // Remove the ad and the brand CSS
       this.adInstance.destroy();
-      appEl.parentNode.removeChild(appEl);
+      if (!this.evo) appEl.parentNode.removeChild(appEl);
       this.active = false;
     }
   }
