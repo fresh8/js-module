@@ -1,17 +1,10 @@
 import 'whatwg-fetch';
-import Ad from './ad';
-import Cache from './cache';
+import Ad from './ad/index';
+import Cache from './cache/index';
 
-import {
-  customEvent,
-  PolyfillHistoryPushState
-} from './polyfill';
+import { customEvent, PolyfillHistoryPushState } from './polyfill';
 
-import {
-  getWindow,
-  bindf8ToWindow,
-  vaildateConfig
-} from './util';
+import { getWindow, bindf8ToWindow, vaildateConfig } from './util';
 
 const version = '1.0.0';
 
@@ -84,6 +77,7 @@ export default class Fresh8 {
       config.creativeFactoryCache = this.creativeFactoryCache;
       // Create a new ad and
       const ad = new this.Ad(config);
+
       // Store the ad for reference
       this.ads.push(ad);
       // Load the ad a return the promise
@@ -129,9 +123,21 @@ export default class Fresh8 {
    */
   _addEventLisnters () {
     this.boundOnCreativeLoaded = this._onCreativeLoaded.bind(this);
-    this.boundOnHistoryPushStateChange = this._onHistoryPushStateChange.bind(this);
-    this.window.addEventListener('__f8-creative-script-loaded', this.boundOnCreativeLoaded);
-    this.window.addEventListener('__f8-history-push-state', this.boundOnHistoryPushStateChange);
+    this.boundOnHistoryPushStateChange = this._onHistoryPushStateChange.bind(
+      this
+    );
+    this.window.addEventListener(
+      '__f8-creative-script-loaded',
+      this.boundOnCreativeLoaded
+    );
+    this.window.addEventListener(
+      '__f8-product-script-loaded',
+      this.boundOnCreativeLoaded
+    );
+    this.window.addEventListener(
+      '__f8-history-push-state',
+      this.boundOnHistoryPushStateChange
+    );
   }
 
   /**
@@ -139,8 +145,18 @@ export default class Fresh8 {
    * lisnters from the window
    */
   _removeEventLisnters () {
-    this.window.removeEventListener('__f8-creative-script-loaded', this.boundOnCreativeLoaded);
-    this.window.removeEventListener('__f8-history-push-state', this.boundOnHistoryPushStateChange);
+    this.window.removeEventListener(
+      '__f8-creative-script-loaded',
+      this.boundOnCreativeLoaded
+    );
+    this.window.removeEventListener(
+      '__f8-product-script-loaded',
+      this.boundOnCreativeLoaded
+    );
+    this.window.removeEventListener(
+      '__f8-history-push-state',
+      this.boundOnHistoryPushStateChange
+    );
   }
 
   /**
@@ -151,15 +167,23 @@ export default class Fresh8 {
   _onCreativeLoaded (event) {
     // Cache the creative factory so we can re used it for other ads
     this.creativeFactoryCache.put(event.creativeRef, event.creativeFactory);
-
     // Loop over the ads and check if any that require a creative factory
     // with the matching creative ref
     this.ads.forEach(ad => {
-      if (ad.awaitingFactory && event.creativeRef === ad.creativeRef) {
-        // Set the creative factory
-        ad._setCreativeFactory(event.creativeFactory);
-        // Call the creative factory loading the ad onto the page
-        ad._callCreativeFactory();
+      if (ad.evo) {
+        if (ad.awaitingFactory && event.config === ad.creativeRef) {
+          // Set the creative factory
+          ad._setCreativeFactory(event.productFactory);
+          // Call the creative factory loading the ad onto the page
+          ad._callCreativeFactory();
+        }
+      } else {
+        if (ad.awaitingFactory && event.creativeRef === ad.creativeRef) {
+          // Set the creative factory
+          ad._setCreativeFactory(event.creativeFactory);
+          // Call the creative factory loading the ad onto the page
+          ad._callCreativeFactory();
+        }
       }
     });
   }

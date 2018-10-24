@@ -1,0 +1,82 @@
+version: 2
+jobs:
+  unit-test:
+    docker:
+    - image: circleci/node:carbon
+    working_directory: ~/js-module
+    steps:
+    - checkout
+    - run:
+        name: Set NPM auth token
+        command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> .npmrc
+    - restore_cache:
+        keys:
+        - v1-yarn-cache-{{ checksum "yarn.lock" }}
+        - v1-yarn-cache # used if checksum fails
+    - run: yarn install --frozen-lockfile
+    - save_cache:
+        key: v1-yarn-cache-{{ checksum "yarn.lock" }}
+        paths:
+        - ~/.cache
+    - run:
+        name: running unit tests
+        command: yarn test:unit
+    - store_artifacts:
+        path: test/coverage
+
+  integration-test:
+    docker:
+    - image: cypress/base:8
+      environment:
+        TERM: xterm
+    working_directory: ~/js-module
+    steps:
+    - checkout
+    - run:
+        name: Set NPM auth token
+        command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> .npmrc
+    - restore_cache:
+        keys:
+        - v1-yarn-cache-{{ checksum "yarn.lock" }}
+        - v1-yarn-cache # used if checksum fails
+    - run: yarn install --frozen-lockfile
+    - save_cache:
+        key: v1-yarn-cache-{{ checksum "yarn.lock" }}
+        paths:
+        - ~/.cache
+    - run:
+        name: Running Integration Tests
+        command: yarn ci
+    - store_artifacts:
+        path: cypress/videos
+    - store_artifacts:
+        path: cypress/screenshots
+  build:
+    docker:
+      - image: circleci/node:carbon
+    working_directory: ~/js-module
+    steps:
+      - checkout
+      - run:
+          name: Set NPM auth token
+          command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> .npmrc
+      - restore_cache:
+          keys:
+          - v1-yarn-cache-{{ checksum "yarn.lock" }}
+          - v1-yarn-cache # used if checksum fails
+      - run: yarn install --frozen-lockfile
+      - save_cache:
+          key: v1-yarn-cache-{{ checksum "yarn.lock" }}
+          paths:
+          - ~/.cache
+      - run:
+          name: Running Unit Tests
+          command: yarn build
+
+workflows:
+  version: 2
+  test-build:
+    jobs:
+      - build
+      - unit-test
+      - integration-test

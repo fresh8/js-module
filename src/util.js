@@ -35,7 +35,11 @@ export function getWindow (shouldBreak) {
  * @return {String}  canonical string or page localtion URL encoded
  */
 export function getRef (window, inApp, userOverrideRef) {
-  if (userOverrideRef && typeof userOverrideRef !== 'undefined' && userOverrideRef !== '') {
+  if (
+    userOverrideRef &&
+    typeof userOverrideRef !== 'undefined' &&
+    userOverrideRef !== ''
+  ) {
     return encodeURIComponent(userOverrideRef);
   }
 
@@ -94,7 +98,13 @@ export function bindf8ToWindow (version, targetWindow) {
         return val;
       }
     } else {
-      throw new Error('Trying to access f8 v' + version + ' property ' + key + ', but its not defined');
+      throw new Error(
+        'Trying to access f8 v' +
+          version +
+          ' property ' +
+          key +
+          ', but its not defined'
+      );
     }
   };
 }

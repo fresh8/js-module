@@ -26,25 +26,25 @@ import { invaildeConfig } from '../errors';
  */
 export function requestAdData (config) {
   const vaildatedConfig = vaildateRequestAdConf(config);
-
   // Build the end point URL with the slot ID
-  const endpoint = constructRequestURL(
-    vaildatedConfig.endpoint,
-    {
-      slot: vaildatedConfig.slotID,
-      view: vaildatedConfig.view,
-      clickUrl: vaildatedConfig.clickTrackingRedirect,
-      sport: vaildatedConfig.sport,
-      match: vaildatedConfig.match,
-      competitorIds: vaildatedConfig.competitorIDs,
-      competitors: vaildatedConfig.competitors,
-      competitionIds: vaildatedConfig.competitionIDs,
-      competitions: vaildatedConfig.competitions,
-      linkSameWindow: vaildatedConfig.linkSameWindow,
-      brand: vaildatedConfig.brand,
-      ref: getRef(vaildatedConfig.window, vaildatedConfig.inApp, vaildatedConfig.url)
-    });
-
+  const endpoint = constructRequestURL(vaildatedConfig.endpoint, {
+    slot: vaildatedConfig.slotID,
+    view: vaildatedConfig.view,
+    clickUrl: vaildatedConfig.clickTrackingRedirect,
+    sport: vaildatedConfig.sport,
+    match: vaildatedConfig.match,
+    competitorIds: vaildatedConfig.competitorIDs,
+    competitors: vaildatedConfig.competitors,
+    competitionIds: vaildatedConfig.competitionIDs,
+    competitions: vaildatedConfig.competitions,
+    linkSameWindow: vaildatedConfig.linkSameWindow,
+    brand: vaildatedConfig.brand,
+    ref: getRef(
+      vaildatedConfig.window,
+      vaildatedConfig.inApp,
+      vaildatedConfig.url
+    )
+  });
   return fetch(endpoint, { credentials: 'include' })
     .then(checkStatusCode)
     .then(parseJSON);
@@ -86,23 +86,30 @@ export function constructRequestURL (url, options = {}) {
   const queryStringsOptions = Object.assign({}, options);
 
   if (typeof queryStringsOptions.competitorIds !== 'undefined') {
-    queryStringsOptions.competitorIds = queryStringsOptions.competitorIds.map(value => encodeURIComponent(value));
+    queryStringsOptions.competitorIds = queryStringsOptions.competitorIds.map(
+      value => encodeURIComponent(value)
+    );
   }
 
   if (typeof queryStringsOptions.competitors !== 'undefined') {
-    queryStringsOptions.competitors = queryStringsOptions.competitors.map(value => encodeURIComponent(value));
+    queryStringsOptions.competitors = queryStringsOptions.competitors.map(
+      value => encodeURIComponent(value)
+    );
   }
 
   if (typeof queryStringsOptions.competitionIds !== 'undefined') {
-    queryStringsOptions.competitionIds = queryStringsOptions.competitionIds.map(value => encodeURIComponent(value));
+    queryStringsOptions.competitionIds = queryStringsOptions.competitionIds.map(
+      value => encodeURIComponent(value)
+    );
   }
 
   if (typeof queryStringsOptions.competitions !== 'undefined') {
-    queryStringsOptions.competitions = queryStringsOptions.competitions.map(value => encodeURIComponent(value));
+    queryStringsOptions.competitions = queryStringsOptions.competitions.map(
+      value => encodeURIComponent(value)
+    );
   }
 
   const queryString = buildQueryString(queryStringsOptions);
-
   return url + queryString;
 }
 
@@ -156,8 +163,13 @@ export function vaildateRequestAdConf (config = {}) {
     config.listenOnPushState = false;
   }
 
-  if ((config.competitors.length !== 0 || config.competitions.length !== 0) && !config.sport) {
-    throw invaildeConfig('Sport is required if "competitions" or "competitors" is passed through in the config');
+  if (
+    (config.competitors.length !== 0 || config.competitions.length !== 0) &&
+    !config.sport
+  ) {
+    throw invaildeConfig(
+      'Sport is required if "competitions" or "competitors" is passed through in the config'
+    );
   }
 
   return config;
