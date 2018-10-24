@@ -149,7 +149,6 @@ export default class Ad {
           } else {
             // Inject the ad factory script and wait for the load event
             injectScriptFactory(this.creativePath);
-            return resolve();
           }
         })
         .catch(reason => {

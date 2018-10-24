@@ -15,9 +15,10 @@
     "preversion": "yarn test && yarn build",
     "postversion": "git push && git push --tags",
     "start": "serve",
-    "ci": "start-server-and-test start 5000 test:integration",
-    "test:integration": "cypress run",
-    "test:integration-watch": "cypress open",
+    "cypress-run": "cypress run",
+    "cypress-open": "cypress open",
+    "test:integration": "yarn build && start-server-and-test start 5000 cypress-run",
+    "test:integration-watch": "start-server-and-test start 5000 cypress-open",
     "test:unit": "karma start test/unit/karma.conf.js --single-run",
     "test:unit-watch": "karma start test/unit/karma.conf.js"
   },

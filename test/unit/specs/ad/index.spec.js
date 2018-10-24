@@ -187,10 +187,20 @@ describe('src/ad/index.js', () => {
           products: [{config: 'creativeRef', skin: 'f8', instances: [{}]}]
         };
 
-        fetchStub.returns(Promise.resolve(mockFetchResponse(body)));
         const ad = new Ad(config);
+
+        fetchStub.returns(Promise.resolve(mockFetchResponse(body)));
+        ad.awaitingFactory = false;
+
+        const callCreativeFactoryStub = sinon.stub(ad, '_callCreativeFactory');
+        callCreativeFactoryStub.returns(Promise.resolve());
+
+        // Simulate a network request injecting a creative factory
+        setTimeout(() => {
+          ad.loadResolvers.resolve(ad);
+        }, 500);
         return ad
-          .load().catch(e => console.log(e))
+          .load()
           .then(() => {
             expect(ad.evo).to.equal(true);
 
@@ -354,7 +364,7 @@ describe('src/ad/index.js', () => {
         expect(document.querySelector('#test-el')).to.equal(null);
       });
 
-      it('Shouldn\'t distroy the ad instance if not active', () => {
+      it('Shouldn\'t destroy the ad instance if not active', () => {
         const config = {
           endpoint: 'https://fresh8.co/123/raw',
           slotID: '123',
