@@ -1,6 +1,6 @@
 {
   "name": "fresh8-js-module",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "Dynamically inject Fresh8 ads into your website or app.",
   "license": "MIT",
   "main": "dist/index.js",
