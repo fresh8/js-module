@@ -1,9 +1,10 @@
 import commonjs from 'rollup-plugin-commonjs';
 import pkg from './package.json';
-import buble from 'rollup-plugin-buble';
+import babel from 'rollup-plugin-babel';
 import { uglify } from 'rollup-plugin-uglify';
 import { terser } from 'rollup-plugin-terser';
 import resolve from 'rollup-plugin-node-resolve';
+import inject from 'rollup-plugin-inject';
 
 export default [
   // browser-friendly UMD build
@@ -19,12 +20,15 @@ export default [
       [require.resolve('whatwg-fetch')]: 'window'
     },
     plugins: [
-      commonjs(), // so Rollup can convert `ms` to an ES module
-      buble({  // transpile ES2015+ to ES5
-        exclude: ['node_modules/**']
+      inject({
+        Promise: 'es6-promise'
       }),
+      commonjs(), // so Rollup can convert `ms` to an ES module
       resolve(),
-      uglify()
+      uglify(),
+      babel({  // transpile ES2015+ to ES5
+        exclude: 'node_modules/**'
+      })
     ]
   },
   {
@@ -36,7 +40,7 @@ export default [
       [require.resolve('whatwg-fetch')]: 'window'
     },
     plugins: [
-      buble({  // transpile ES2015+ to ES5
+      babel({  // transpile ES2015+ to ES5
         exclude: ['node_modules/**']
       }),
       resolve(),
@@ -52,7 +56,7 @@ export default [
       [require.resolve('whatwg-fetch')]: 'window'
     },
     plugins: [
-      buble({  // transpile ES2015+ to ES5
+      babel({  // transpile ES2015+ to ES5
         exclude: ['node_modules/**']
       }),
       resolve(),
