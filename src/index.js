@@ -2,7 +2,8 @@ import 'whatwg-fetch';
 import Ad from './ad/index';
 import Cache from './cache/index';
 
-import { customEvent, PolyfillHistoryPushState } from './polyfill';
+import { customEvent, PolyfillHistoryPushState, objectAssign } from './polyfill';
+objectAssign();
 
 import { getWindow, bindf8ToWindow, vaildateConfig } from './util';
 

@@ -4,6 +4,7 @@ import buble from 'rollup-plugin-buble';
 import { uglify } from 'rollup-plugin-uglify';
 import { terser } from 'rollup-plugin-terser';
 import resolve from 'rollup-plugin-node-resolve';
+import inject from 'rollup-plugin-inject';
 
 export default [
   // browser-friendly UMD build
@@ -19,12 +20,15 @@ export default [
       [require.resolve('whatwg-fetch')]: 'window'
     },
     plugins: [
-      commonjs(), // so Rollup can convert `ms` to an ES module
-      buble({  // transpile ES2015+ to ES5
-        exclude: ['node_modules/**']
+      inject({
+        Promise: 'es6-promise'
       }),
+      commonjs(), // so Rollup can convert `ms` to an ES module
       resolve(),
-      uglify()
+      uglify(),
+      buble({  // transpile ES2015+ to ES5
+        exclude: 'node_modules/**'
+      })
     ]
   },
   {
