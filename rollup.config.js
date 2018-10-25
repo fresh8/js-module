@@ -1,6 +1,6 @@
 import commonjs from 'rollup-plugin-commonjs';
 import pkg from './package.json';
-import babel from 'rollup-plugin-babel';
+import buble from 'rollup-plugin-buble';
 import { uglify } from 'rollup-plugin-uglify';
 import { terser } from 'rollup-plugin-terser';
 import resolve from 'rollup-plugin-node-resolve';
@@ -25,8 +25,8 @@ export default [
       }),
       commonjs(), // so Rollup can convert `ms` to an ES module
       resolve(),
-      uglify(),
-      babel({  // transpile ES2015+ to ES5
+      // uglify(),
+      buble({  // transpile ES2015+ to ES5
         exclude: 'node_modules/**'
       })
     ]
@@ -40,7 +40,7 @@ export default [
       [require.resolve('whatwg-fetch')]: 'window'
     },
     plugins: [
-      babel({  // transpile ES2015+ to ES5
+      buble({  // transpile ES2015+ to ES5
         exclude: ['node_modules/**']
       }),
       resolve(),
@@ -56,7 +56,7 @@ export default [
       [require.resolve('whatwg-fetch')]: 'window'
     },
     plugins: [
-      babel({  // transpile ES2015+ to ES5
+      buble({  // transpile ES2015+ to ES5
         exclude: ['node_modules/**']
       }),
       resolve(),
