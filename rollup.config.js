@@ -25,7 +25,7 @@ export default [
       }),
       commonjs(), // so Rollup can convert `ms` to an ES module
       resolve(),
-      // uglify(),
+      uglify(),
       buble({  // transpile ES2015+ to ES5
         exclude: 'node_modules/**'
       })
